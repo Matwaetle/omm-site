@@ -32,10 +32,9 @@ export default function HeroCommand() {
       <button
         type="button"
         onClick={copy}
-        aria-live="polite"
         className="shrink-0 rounded-sm border border-line-1 px-2 py-1 font-mono text-[11px] text-ink-2 transition-colors duration-[120ms] ease-micro hover:bg-bg-3 hover:text-ink-0"
       >
-        {copied ? "copied" : "copy"}
+        <span aria-live="polite">{copied ? "copied" : "copy"}</span>
       </button>
     </div>
   );

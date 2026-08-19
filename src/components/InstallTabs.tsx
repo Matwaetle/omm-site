@@ -123,7 +123,7 @@ export default function InstallTabs() {
 
       {/* Both panels occupy the same grid cell, so the block reserves the height
           of the taller one and the 180ms crossfade never moves the layout. */}
-      <div className="mt-8 grid">
+      <div className="mt-8 grid grid-cols-[minmax(0,1fr)]">
         {PLATFORMS.map((platform) => {
           const active = platform.id === activeId;
           const copied = copiedId === platform.id;

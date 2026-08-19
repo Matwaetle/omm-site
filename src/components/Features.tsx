@@ -10,6 +10,7 @@ import FeatureLinkDiagram from "@/components/FeatureLinkDiagram";
 import FeatureBudgetBar from "@/components/FeatureBudgetBar";
 import FeatureBenchTable from "@/components/FeatureBenchTable";
 import FeatureCatalogDiff from "@/components/FeatureCatalogDiff";
+import Reveal from "@/components/Reveal";
 
 type Row = {
   id: string;
@@ -45,8 +46,9 @@ const ROWS: Row[] = [
       <>
         A scan reads total RAM, live availability and GPU memory, then holds
         back 10% of total RAM — never less than 1 GB — for the OS and the apps
-        opened after the scan. The safe budget is whichever is smaller: that
-        live figure, or 80% of total RAM. Rerunning the scan re-derives both.
+        opened after the scan. The safe budget is whichever is smaller: what is
+        left after that subtraction, or 80% of total RAM. Rerunning the scan
+        re-derives both.
       </>
     ),
     visual: <FeatureBudgetBar />,
@@ -100,7 +102,7 @@ export default function Features() {
               index === 0 ? "pt-32" : index === ROWS.length - 1 ? "pb-32" : ""
             }`}
           >
-            <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-12 md:gap-6">
+            <Reveal className="grid grid-cols-1 items-center gap-8 md:grid-cols-12 md:gap-6">
               <div
                 className={
                   row.textFirst
@@ -122,7 +124,7 @@ export default function Features() {
               >
                 {row.visual}
               </div>
-            </div>
+            </Reveal>
           </div>
         </div>
       ))}

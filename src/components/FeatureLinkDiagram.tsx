@@ -14,7 +14,13 @@ type Runner = { name: string; dir: string; linked: boolean };
 const RUNNERS: Runner[] = [
   { name: "ollama", dir: "~/.ollama/models", linked: true },
   { name: "lmstudio", dir: "~/.lmstudio/models", linked: true },
-  { name: "jan", dir: "~/.config/Jan/data/llamacpp/models", linked: true },
+  {
+    name: "jan",
+    /* linker.py:1500 returns the models dir, but linker.py:18 notes Jan only
+       picks the file up from a per-model subdirectory under it. */
+    dir: "~/.config/Jan/data/llamacpp/models/<model-id>/",
+    linked: true,
+  },
   {
     name: "anythingllm",
     dir: "~/.config/anythingllm-desktop/storage/models/ollama",

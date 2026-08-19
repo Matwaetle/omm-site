@@ -1,4 +1,5 @@
 import InstallTabs from "@/components/InstallTabs";
+import Reveal from "@/components/Reveal";
 
 /** README: "Both installers clone to a versioned staging directory, verify the
  *  signed commit against a bootstrap trust anchor, and only then switch pipx to it." */
@@ -31,7 +32,7 @@ export default function Install() {
 
       <div className="relative mx-auto w-full max-w-page px-5 md:px-8">
         <div className="mx-auto max-w-[880px]">
-          <div className="text-center">
+          <Reveal className="text-center">
             <p className="text-label">Install</p>
             <h2 className="text-h2 mt-4">
               One line. It verifies the signed commit before it installs
@@ -42,7 +43,7 @@ export default function Install() {
               Linux. The script bootstraps whatever is missing, then installs
               omm as an isolated pipx CLI.
             </p>
-          </div>
+          </Reveal>
 
           <div className="mt-12">
             <InstallTabs />

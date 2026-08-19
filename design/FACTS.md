@@ -40,10 +40,16 @@ https://github.com/omm-hippo/omm/wiki/Compatible-Programs
 ```
 Note: "RAM available 0.7 GB" was captured under heavy load — if the demo needs a scan where a model fits, re-derive numbers from the real format above but keep CPU/GPU/OS/total-RAM identical, and available/budget plausible for this machine (e.g. available 9.8 GB, safe budget 8.2 GB). Format authenticity > this particular snapshot.
 
+Sanctioned demo state (runner detection): the capture machine had only Ollama installed, but the hero terminal shows **Ollama + LM Studio + Jan detected** and `+ 4 program(s) not installed`. This is a sanctioned demo state, not a captured one: the site needs a machine where the link story is visible, and the three-runner state is internally consistent everywhere it propagates — `omm scan`, the `omm install` link summary, the `Links` column of `omm list`, and the accent connectors + legend of the link diagram all report the same three runners. CPU/GPU/OS/total-RAM stay the real captured values; only detection state is re-derived, exactly as available/budget are above. Provenance: orchestrator ruling, 2026-08-19.
+
+## Model file size (build-time API, not a capture)
+`mistral-7b-instruct-v0.2.Q4_K_M.gguf = 4,368,439,584 bytes` (HF API, `TheBloke/Mistral-7B-Instruct-v0.2-GGUF` tree, retrieved 2026-08-19) `= 4.37 GB decimal = 4.07 GiB`.
+`hub.py` `CURATED_INDEX` stores only `(repo_id, filename)`, so this line is the sole source for every size on the page. The terminal's `omm list` row prints `4.07` under a `GB` label because `cli.py:4369-4375` divides by `1024**3` and labels the unit `GB` — a real upstream defect, reproduced deliberately and captioned under the terminal window.
+
 For `omm install` / `omm list` output formats: read the actual omm source (`omm-hippo/src/`) — grep for the progress/link/done strings and reproduce that real format. Do not invent a format.
 
 ## Verified claims (README line refs)
-- Localfit safe budget: live scan subtracts memory used by other apps, keeps at least 2 GB (or 10% of RAM) for the OS, applies total-memory caps; rerunning adapts. (README ~145-149)
+- Localfit safe budget: live scan subtracts memory used by other apps, keeps at least 1 GB (code: `hardware.py` `RAM_SAFETY_RESERVE_MIN_GB=1.0`, used as `max(1.0, total*0.10)`; README says 2 GB — stale, upstream fix filed) or 10% of RAM for the OS, applies total-memory caps; rerunning adapts. (README ~145-149)
 - Benchmark: versioned eight-item bilingual arithmetic smoke pack, Ollama only, stores no generated text, median of repeated samples, "intentionally small and is not a leaderboard". (README ~151-158)
 - Signed catalogs: `omm setting catalog-trust` enables Ed25519 verification for recommendation downloads; artifacts snapshotted before replacement; `omm setting catalog-rollback` restores. (README ~238-239)
 - Installers: versioned staging clone, verify signed commit against bootstrap trust anchor, then switch pipx. (README ~30)

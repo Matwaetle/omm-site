@@ -11,6 +11,8 @@
  * cannot be full-bleed and contained at once.
  */
 
+import Reveal from "@/components/Reveal";
+
 type Chip = { os: string; note?: string };
 type RunnerRow = { runner: string; automated: Chip[]; manual: string };
 
@@ -78,8 +80,8 @@ const GRID =
 export default function Runners() {
   return (
     <section id="runners" className="border-t border-line-0 py-24">
-      <div className={CONTAINER}>
-        <p className="text-label">7 runners · 21 platform targets</p>
+      <Reveal className={CONTAINER}>
+        <p className="text-label">7 runners · 3 platforms</p>
         <h2 className="mt-4 max-w-[22ch] text-h2">
           omm links into these seven. It does not replace any of them.
         </h2>
@@ -88,7 +90,7 @@ export default function Runners() {
           automated. Everywhere else omm still links the model into the runner
           you installed yourself.
         </p>
-      </div>
+      </Reveal>
 
       <div role="table" className="mt-12">
         <div role="rowgroup" className="border-y border-line-0 bg-bg-1">

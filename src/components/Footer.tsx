@@ -58,6 +58,11 @@ const COLUMNS: readonly FooterColumn[] = [
 ];
 
 export default function Footer() {
+  /* DIRECTION.md §4.7: the bottom row carries the build's real commit
+     short-SHA. Vercel injects it at build time; locally it is absent, and the
+     row then renders repo + license only rather than a fake placeholder. */
+  const sha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7);
+
   return (
     <footer className="border-t border-line-0 bg-bg-0 py-16">
       <div className="mx-auto w-full max-w-page px-5 md:px-8">
@@ -75,7 +80,7 @@ export default function Footer() {
           >
             {COLUMNS.map((column) => (
               <div key={column.title}>
-                <h2 className="text-label">{column.title}</h2>
+                <h3 className="text-label">{column.title}</h3>
                 <ul className="mt-4 flex flex-col gap-2">
                   {column.links.map((link) => (
                     <li key={link.label}>
@@ -98,6 +103,7 @@ export default function Footer() {
         <div className="mt-12 flex flex-wrap gap-x-6 gap-y-2 border-t border-line-0 pt-6">
           <span className="text-label">github.com/omm-hippo/omm</span>
           <span className="text-label">MIT license</span>
+          {sha ? <span className="text-label">build {sha}</span> : null}
         </div>
       </div>
     </footer>

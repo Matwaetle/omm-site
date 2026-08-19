@@ -23,7 +23,7 @@
   --ink-0: #f4f4f4; /* display + h2 */
   --ink-1: #c2c2c2; /* body */
   --ink-2: #8a8a8a; /* secondary, captions */
-  --ink-3: #5c5c5c; /* labels, disabled, terminal dim output */
+  --ink-3: #767676; /* labels, disabled, terminal dim output — 4.5:1 on bg-0 */
 
   /* lines */
   --line-0: #212121; /* default hairline */

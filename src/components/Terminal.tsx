@@ -12,9 +12,11 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
  *                     (omm-hippo/src/omm/cli.py:923).
  *  download line      omm-hippo/src/omm/downloader.py:107-170 — rich Progress
  *                     with SpinnerColumn, the filename, an ASCII '#' bar
- *                     (_HashBar, deliberately not Unicode blocks), DownloadColumn
- *                     (base-1000 "GB"), TransferSpeedColumn and EtaColumn
- *                     ("ETA " + compact m:ss).
+ *                     (_HashBar, deliberately not Unicode blocks) and
+ *                     DownloadColumn (base-1000 "GB"). The real Progress also
+ *                     carries TransferSpeedColumn/EtaColumn, but no sanctioned
+ *                     capture in design/FACTS.md records a transfer speed and an
+ *                     invented one is banned, so those two columns are omitted.
  *  checksum line      omm-hippo/src/omm/cli.py:3031-3032.
  *  install summary    omm-hippo/src/omm/cli.py:3745-3751. Runners that are not
  *                     installed are skipped silently (cli.py:2141-2155), which
@@ -105,28 +107,21 @@ const SCAN_BLOCK: Line[] = [
 const MODEL_ID = "mistral-7b-instruct-q4";
 const MODEL_FILE = "mistral-7b-instruct-v0.2.Q4_K_M.gguf";
 const OLLAMA_TAG = "mistral-7b-instruct-v0.2.q4_k_m";
+/** design/FACTS.md: 4,368,439,584 bytes, HF file listing, retrieved 2026-08-19. */
 const TOTAL_BYTES = 4_368_439_584;
-const SPEED_BPS = 41_800_000;
 const BAR_WIDTH = 12;
 const SPINNER = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏";
-
-const mmss = (seconds: number) => {
-  const s = Math.max(0, Math.round(seconds));
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-};
 
 function downloadLine(ratio: number, tick: number): Line {
   const filled = Math.min(BAR_WIDTH, Math.round(BAR_WIDTH * ratio));
   const done = (TOTAL_BYTES * ratio) / 1e9;
   const total = TOTAL_BYTES / 1e9;
-  const eta = (TOTAL_BYTES * (1 - ratio)) / SPEED_BPS;
   return [
     { t: ratio >= 1 ? "  " : `${SPINNER[tick % SPINNER.length]} `, tone: "dim" },
     { t: MODEL_FILE, tone: "accent" },
     { t: " ", tone: "dim" },
     { t: rule("#", filled) + rule(" ", BAR_WIDTH - filled), tone: "accent" },
     { t: ` ${done.toFixed(1)}/${total.toFixed(1)} GB`, tone: "out" },
-    { t: ` ${(SPEED_BPS / 1e6).toFixed(1)} MB/s ETA ${mmss(eta)}`, tone: "dim" },
   ];
 }
 
@@ -231,7 +226,7 @@ const subscribeReducedMotion = (onChange: () => void) => {
 
 const A11Y_LABEL =
   "Terminal recording. omm scan reports the machine and three installed runners; " +
-  "omm install downloads a 4.4 GB quantised Mistral 7B and links it; " +
+  "omm install downloads a 4.37 GB quantised Mistral 7B and links it; " +
   "omm list shows the single file linked into Ollama, LM Studio and Jan.";
 
 export default function Terminal() {
@@ -315,43 +310,52 @@ export default function Terminal() {
   const last = lines.length - 1;
 
   return (
-    <div
-      role="img"
-      aria-label={A11Y_LABEL}
-      className="relative overflow-hidden rounded-lg border border-line-1 bg-bg-1"
-    >
-      <style href="omm-terminal-cursor" precedence="default">
-        {CURSOR_CSS}
-      </style>
-
-      <div className="flex h-[34px] items-center gap-2 border-b border-line-0 bg-bg-2 px-4">
-        <span className="h-2 w-2 rounded-full bg-ink-3" />
-        <span className="h-2 w-2 rounded-full bg-line-1" />
-        <span className="h-2 w-2 rounded-full bg-line-1" />
-        <span className="ml-3 font-mono text-[11px] text-ink-3">ahseo@workstation</span>
-        <span className="ml-auto font-mono text-[11px] text-ink-3">pwsh 7.4</span>
-      </div>
-
+    <div>
       <div
-        ref={bodyRef}
-        aria-hidden="true"
-        className="h-[380px] overflow-x-auto overflow-y-hidden px-5 py-5 [scrollbar-width:none] md:h-[520px] [&::-webkit-scrollbar]:hidden"
-        style={{ maskImage: BODY_MASK, WebkitMaskImage: BODY_MASK }}
+        role="img"
+        aria-label={A11Y_LABEL}
+        className="relative overflow-hidden rounded-lg border border-line-1 bg-bg-1"
       >
-        <pre className="w-max text-terminal text-[11px] md:text-[13.5px]">
-          {lines.map((parts, index) => (
-            <div key={index}>
-              {parts.length === 0 ? " " : null}
-              {parts.map((part, partIndex) => (
-                <span key={partIndex} className={TONE[part.tone]}>
-                  {part.t}
-                </span>
-              ))}
-              {started && index === last ? <span className="omm-cursor" /> : null}
-            </div>
-          ))}
-        </pre>
+        <style href="omm-terminal-cursor" precedence="default">
+          {CURSOR_CSS}
+        </style>
+
+        <div className="flex h-[34px] items-center gap-2 border-b border-line-0 bg-bg-2 px-4">
+          <span className="h-2 w-2 rounded-full bg-ink-3" />
+          <span className="h-2 w-2 rounded-full bg-line-1" />
+          <span className="h-2 w-2 rounded-full bg-line-1" />
+          <span className="ml-3 font-mono text-[11px] text-ink-3">ahseo@workstation</span>
+          <span className="ml-auto font-mono text-[11px] text-ink-3">pwsh 7.4</span>
+        </div>
+
+        <div
+          ref={bodyRef}
+          aria-hidden="true"
+          className="h-[380px] overflow-x-auto overflow-y-hidden px-5 py-5 [scrollbar-width:none] md:h-[520px] [&::-webkit-scrollbar]:hidden"
+          style={{ maskImage: BODY_MASK, WebkitMaskImage: BODY_MASK }}
+        >
+          <pre className="w-max text-terminal text-[11px] md:text-[13.5px]">
+            {lines.map((parts, index) => (
+              <div key={index}>
+                {parts.length === 0 ? " " : null}
+                {parts.map((part, partIndex) => (
+                  <span key={partIndex} className={TONE[part.tone]}>
+                    {part.t}
+                  </span>
+                ))}
+                {started && index === last ? <span className="omm-cursor" /> : null}
+              </div>
+            ))}
+          </pre>
+        </div>
       </div>
+
+      {/* The download line prints base-1000 GB and `omm list` prints
+          bytes/1024^3 under a "GB" label (cli.py:4369-4375) — one real file,
+          two real renderings. Named here rather than left to look invented. */}
+      <p className="text-small mt-3 text-ink-3">
+        4.37 GB decimal = 4.07 GiB — omm list labels GiB as GB; bug filed upstream.
+      </p>
     </div>
   );
 }

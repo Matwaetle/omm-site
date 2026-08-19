@@ -40,7 +40,7 @@ const SEGMENTS = [
     key: "budget",
     gb: BUDGET_GB,
     read: "8.2 GB",
-    label: "Safe model budget",
+    label: "Safe model budget — the smaller of the two",
     fill: "bg-line-1",
   },
 ];
@@ -87,9 +87,7 @@ export default function FeatureBudgetBar() {
           </div>
         ))}
         <div className="flex justify-between border-t border-line-0 py-2">
-          <dt className="text-ink-3">
-            Install cap — 80% of total, whichever is smaller
-          </dt>
+          <dt className="text-ink-3">Install cap — 80% of total RAM</dt>
           <dd className="text-ink-3">12.4 GB</dd>
         </div>
       </dl>

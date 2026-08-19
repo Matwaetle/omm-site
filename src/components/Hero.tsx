@@ -39,9 +39,10 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Bleeds 48px past the container edge so it reads as a window, not a card.
-            The bleed is clipped at the viewport by overflow-x-clip on the section. */}
-        <div className="relative mt-12 lg:col-span-7 lg:mt-2 lg:-mr-12">
+        {/* Bleeds 24px past the container edge so it reads as a window, not a card
+            — small enough that the window's right hairline stays inside the
+            viewport at 1280 with a scrollbar. Clipped by overflow-x-clip. */}
+        <div className="relative mt-12 lg:col-span-7 lg:mt-2 lg:-mr-6">
           <div className="pointer-events-none absolute -inset-8" style={WASH} aria-hidden="true" />
           <div className="relative">
             <Terminal />
