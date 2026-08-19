@@ -56,7 +56,7 @@ export default function Problem() {
                       <span className="w-24 shrink-0 text-ink-3">
                         -rw-r--r--
                       </span>
-                      <span className="w-16 shrink-0 text-right text-ink-1">
+                      <span className="w-20 shrink-0 text-right whitespace-nowrap text-ink-1">
                         {SIZE}
                       </span>
                       <span className="text-ink-2">{copy.dir}</span>
@@ -65,7 +65,7 @@ export default function Problem() {
                 </ul>
                 <div className="mt-2 flex gap-3 border-t border-line-0 pt-2">
                   <span className="w-24 shrink-0" aria-hidden="true" />
-                  <span className="w-16 shrink-0 text-right text-ink-0">
+                  <span className="w-20 shrink-0 text-right whitespace-nowrap text-ink-0">
                     17.48 GB
                   </span>
                   <span className="text-ink-2">

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Archivo, JetBrains_Mono } from "next/font/google";
+import { Archivo } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 // Variable Archivo: wght 100–900 plus the wdth axis (62–125) so `.text-display`
@@ -11,10 +12,16 @@ const archivo = Archivo({
   display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
+// Self-hosted full-glyph build (OFL, src/fonts/OFL.txt): the Google-served
+// latin subset lacks the box-drawing block (U+2500–257F), so the terminal
+// tables fell back to a different-width mono and their rules misaligned.
+const jetbrainsMono = localFont({
   variable: "--font-jetbrains",
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  src: [
+    { path: "../fonts/JetBrainsMono-Regular.woff2", weight: "400" },
+    { path: "../fonts/JetBrainsMono-Medium.woff2", weight: "500" },
+    { path: "../fonts/JetBrainsMono-Bold.woff2", weight: "700" },
+  ],
   display: "swap",
 });
 
@@ -23,7 +30,7 @@ const description =
   "omm is an apt/brew-style package manager for local LLMs (GGUF). It installs models into a central hub, links them into seven local AI runners automatically, and can recommend a model that fits your hardware.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://omm-site.vercel.app"),
+  metadataBase: new URL("https://omm-site-sage.vercel.app"),
   title,
   description,
   applicationName: "omm",
