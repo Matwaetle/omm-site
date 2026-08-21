@@ -1,7 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
+
+import {
+  LOCALES,
+  LOCALE_COOKIE,
+  LOCALE_COOKIE_MAX_AGE,
+  LOCALE_LABEL,
+  LOCALE_NAME,
+  HTML_LANG,
+  localeHref,
+  switchLocalePath,
+  type Locale,
+} from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionaries";
 
 /** Real published version — omm-hippo origin/main `pyproject.toml`
  *  `version = "0.2.148"`, which is also the v0.2.148 tag. */
@@ -11,26 +25,82 @@ const WIKI = `${REPO}/wiki`;
 
 /** Section ids are owned by the other section components. */
 /* Absolute so the same nav works from /install/* as well as from "/". */
-const SECTIONS = [
-  { label: "Problem", href: "/#problem" },
-  { label: "Features", href: "/#features" },
-  { label: "Runners", href: "/#runners" },
-  { label: "Install", href: "/#install" },
-] as const;
+const SECTION_HREFS = ["/#problem", "/#features", "/#runners", "/#install"] as const;
 
 const LINK =
   "border-b border-transparent pb-0.5 text-small text-ink-2 transition-colors duration-[120ms] ease-micro hover:border-accent hover:text-ink-0";
 
-export default function Nav() {
+/**
+ * Remembers the reader's choice so the `Accept-Language` redirect in
+ * `src/proxy.ts` never overrides it on a later visit. Written from the click
+ * rather than from a server action: the toggle is a plain link, so the
+ * navigation itself is what renders the other language.
+ */
+function rememberLocale(locale: Locale) {
+  document.cookie = `${LOCALE_COOKIE}=${locale}; path=/; max-age=${LOCALE_COOKIE_MAX_AGE}; samesite=lax`;
+}
+
+/** EN / KO segmented control — same geometry as the Install tabs (§4.6). */
+function LanguageToggle({
+  locale,
+  label,
+  onNavigate,
+  className = "",
+}: {
+  locale: Locale;
+  label: string;
+  onNavigate?: () => void;
+  className?: string;
+}) {
+  const pathname = usePathname();
+
+  return (
+    <div
+      aria-label={label}
+      className={`inline-flex gap-1 rounded-md border border-line-1 bg-bg-0 p-1 ${className}`}
+    >
+      {LOCALES.map((candidate) => {
+        const active = candidate === locale;
+        return (
+          <Link
+            key={candidate}
+            href={switchLocalePath(pathname, candidate)}
+            /* hrefLang describes the destination. No `lang` here: both chips
+               are Latin, and marking one of them Korean would hand it the
+               `:lang(ko)` tracking and make the pair look uneven. */
+            hrefLang={HTML_LANG[candidate]}
+            aria-current={active ? "true" : undefined}
+            title={LOCALE_NAME[candidate]}
+            onClick={() => {
+              rememberLocale(candidate);
+              onNavigate?.();
+            }}
+            className={`text-label rounded-md border-b-2 px-2.5 py-1.5 transition-colors duration-[120ms] ease-[var(--ease-micro)] ${
+              active
+                ? "border-accent bg-bg-2 text-ink-0"
+                : "border-transparent text-ink-2 hover:bg-bg-3 hover:text-ink-0"
+            }`}
+          >
+            {LOCALE_LABEL[candidate]}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+export default function Nav({ locale }: { locale: Locale }) {
   const [open, setOpen] = useState(false);
+  const t = getDictionary(locale).nav;
+  const close = () => setOpen(false);
 
   return (
     <header className="sticky top-0 z-50 border-b border-line-0 bg-bg-0/92">
       <div className="mx-auto flex h-14 max-w-page items-center px-5 md:px-8">
         <Link
-          href="/"
+          href={localeHref("/", locale)}
           className="flex shrink-0 items-center gap-2"
-          onClick={() => setOpen(false)}
+          onClick={close}
         >
           <span className="font-mono text-[15px] font-medium lowercase text-ink-0">omm</span>
           <span className="rounded-sm border border-line-1 px-1.5 py-0.5 font-mono text-[11px] leading-none text-ink-3">
@@ -39,28 +109,29 @@ export default function Nav() {
         </Link>
 
         <nav className="ml-8 hidden items-center gap-6 md:flex">
-          {SECTIONS.map((s) => (
-            <a key={s.href} href={s.href} className={LINK}>
-              {s.label}
+          {SECTION_HREFS.map((href, index) => (
+            <a key={href} href={localeHref(href, locale)} className={LINK}>
+              {t.sections[index]}
             </a>
           ))}
-          <Link href="/install" className={LINK}>
-            Guides
+          <Link href={localeHref("/install", locale)} className={LINK}>
+            {t.guides}
           </Link>
           <a href={WIKI} className={LINK} target="_blank" rel="noreferrer">
-            Docs
+            {t.docs}
           </a>
         </nav>
 
         <div className="ml-auto hidden items-center gap-6 md:flex">
           <a href={REPO} className={LINK} target="_blank" rel="noreferrer">
-            GitHub
+            {t.github}
           </a>
+          <LanguageToggle locale={locale} label={t.language} />
           <Link
-            href="/#install"
+            href={localeHref("/#install", locale)}
             className="focus-ring-neutral rounded-md bg-accent px-4 py-1.5 text-small font-medium text-accent-ink transition-colors duration-[120ms] ease-micro hover:bg-accent-press"
           >
-            Install
+            {t.install}
           </Link>
         </div>
 
@@ -71,7 +142,7 @@ export default function Nav() {
           onClick={() => setOpen((v) => !v)}
           className="ml-auto rounded-md border border-line-1 px-3 py-2 text-label text-ink-2 md:hidden"
         >
-          {open ? "close" : "menu"}
+          {open ? t.close : t.menu}
         </button>
       </div>
 
@@ -79,22 +150,22 @@ export default function Nav() {
       {open ? (
         <div id="nav-panel" className="border-t border-line-0 bg-bg-0 md:hidden">
           <nav className="mx-auto flex max-w-page flex-col px-5 py-2">
-            {SECTIONS.map((s) => (
+            {SECTION_HREFS.map((href, index) => (
               <a
-                key={s.href}
-                href={s.href}
-                onClick={() => setOpen(false)}
+                key={href}
+                href={localeHref(href, locale)}
+                onClick={close}
                 className="border-b border-line-0 py-3 text-small text-ink-2"
               >
-                {s.label}
+                {t.sections[index]}
               </a>
             ))}
             <Link
-              href="/install"
-              onClick={() => setOpen(false)}
+              href={localeHref("/install", locale)}
+              onClick={close}
               className="border-b border-line-0 py-3 text-small text-ink-2"
             >
-              Guides
+              {t.guides}
             </Link>
             <a
               href={WIKI}
@@ -102,7 +173,7 @@ export default function Nav() {
               rel="noreferrer"
               className="border-b border-line-0 py-3 text-small text-ink-2"
             >
-              Docs
+              {t.docs}
             </a>
             <a
               href={REPO}
@@ -110,14 +181,22 @@ export default function Nav() {
               rel="noreferrer"
               className="border-b border-line-0 py-3 text-small text-ink-2"
             >
-              GitHub
+              {t.github}
             </a>
+            <div className="flex items-center justify-between border-b border-line-0 py-3">
+              <span className="text-small text-ink-2">{t.language}</span>
+              <LanguageToggle
+                locale={locale}
+                label={t.language}
+                onNavigate={close}
+              />
+            </div>
             <Link
-              href="/#install"
-              onClick={() => setOpen(false)}
+              href={localeHref("/#install", locale)}
+              onClick={close}
               className="focus-ring-neutral mt-4 mb-2 rounded-md bg-accent px-4 py-2 text-center text-small font-medium text-accent-ink"
             >
-              Install
+              {t.install}
             </Link>
           </nav>
         </div>

@@ -11,85 +11,31 @@ import FeatureBudgetBar from "@/components/FeatureBudgetBar";
 import FeatureBenchTable from "@/components/FeatureBenchTable";
 import FeatureCatalogDiff from "@/components/FeatureCatalogDiff";
 import Reveal from "@/components/Reveal";
+import RichText from "@/components/RichText";
+import type { Locale } from "@/i18n/config";
+import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
 
 type Row = {
-  id: string;
-  eyebrow: string;
-  title: string;
-  body: ReactNode;
+  id: keyof Dictionary["features"];
   visual: ReactNode;
   /** true → text on the left in a 5/7 split, false → visual left in 7/5 */
   textFirst: boolean;
 };
 
-const ROWS: Row[] = [
-  {
-    id: "hub",
-    eyebrow: "One hub",
-    title: "One file on disk. Seven runners think they own it.",
-    body: (
-      <>
-        omm writes the GGUF once into <code className="rounded-sm bg-bg-1 px-1 font-mono text-ink-0">~/.omm/models</code> and links it
-        into every runner directory it can resolve on the machine. Runners that
-        are not installed are skipped rather than guessed at, and Windows falls
-        back from hard link to symlink to an owned copy with a free-space check.
-      </>
-    ),
-    visual: <FeatureLinkDiagram />,
-    textFirst: true,
-  },
-  {
-    id: "localfit",
-    eyebrow: "Localfit",
-    title: "It checks whether the model fits before it spends your bandwidth.",
-    body: (
-      <>
-        A scan reads total RAM, live availability and GPU memory, then holds
-        back 10% of total RAM — never less than 1 GB — for the OS and the apps
-        opened after the scan. The safe budget is whichever is smaller: what is
-        left after that subtraction, or 80% of total RAM. Rerunning the scan
-        re-derives both.
-      </>
-    ),
-    visual: <FeatureBudgetBar />,
-    textFirst: false,
-  },
-  {
-    id: "benchmarks",
-    eyebrow: "Benchmarks",
-    title: "Eight problems, fixed seed, median of repeated samples.",
-    body: (
-      <>
-        The quality pack is versioned and bilingual, runs through Ollama at
-        temperature 0, and grades one number per item against a known answer.
-        Generated text is never stored, and the result it reports is a median
-        over repeated samples rather than a single lucky pass.
-      </>
-    ),
-    visual: <FeatureBenchTable />,
-    textFirst: true,
-  },
-  {
-    id: "catalogs",
-    eyebrow: "Signed catalogs",
-    title: "Every catalog it replaces is kept, hash and all.",
-    body: (
-      <>
-        <code className="rounded-sm bg-bg-1 px-1 font-mono text-ink-0">catalog-trust</code> pins an Ed25519 public key and a manifest
-        URL, and refuses any recommendation artifact whose hash or signature
-        does not match. The replaced snapshot is archived under its own sha256,
-        so <code className="rounded-sm bg-bg-1 px-1 font-mono text-ink-0">catalog-rollback</code> puts the previous catalog back.
-      </>
-    ),
-    visual: <FeatureCatalogDiff />,
-    textFirst: false,
-  },
-];
+export default function Features({ locale }: { locale: Locale }) {
+  const dictionary = getDictionary(locale);
+  const t = dictionary.features;
 
-export default function Features() {
+  const rows: Row[] = [
+    { id: "hub", visual: <FeatureLinkDiagram locale={locale} />, textFirst: true },
+    { id: "localfit", visual: <FeatureBudgetBar locale={locale} />, textFirst: false },
+    { id: "benchmarks", visual: <FeatureBenchTable locale={locale} />, textFirst: true },
+    { id: "catalogs", visual: <FeatureCatalogDiff locale={locale} />, textFirst: false },
+  ];
+
   return (
     <section id="features">
-      {ROWS.map((row, index) => (
+      {rows.map((row, index) => (
         <div
           key={row.id}
           /* Problem's own bottom rule opens the section, so the first row does
@@ -99,7 +45,7 @@ export default function Features() {
         >
           <div
             className={`mx-auto w-full max-w-page px-5 py-24 md:px-8 ${
-              index === 0 ? "pt-32" : index === ROWS.length - 1 ? "pb-32" : ""
+              index === 0 ? "pt-32" : index === rows.length - 1 ? "pb-32" : ""
             }`}
           >
             <Reveal className="grid grid-cols-1 items-center gap-8 md:grid-cols-12 md:gap-6">
@@ -110,9 +56,11 @@ export default function Features() {
                     : "md:col-span-5 md:col-start-8 md:row-start-1"
                 }
               >
-                <p className="text-label">{row.eyebrow}</p>
-                <h2 className="mt-4 text-h2">{row.title}</h2>
-                <p className="mt-6 max-w-[52ch]">{row.body}</p>
+                <p className="text-label">{t[row.id].eyebrow}</p>
+                <h2 className="mt-4 text-h2">{t[row.id].title}</h2>
+                <p className="mt-6 max-w-[52ch]">
+                  <RichText segments={t[row.id].body} />
+                </p>
               </div>
 
               <div

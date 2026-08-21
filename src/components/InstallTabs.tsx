@@ -4,22 +4,22 @@ import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import CommandBlock from "@/components/install/CommandBlock";
+import type { Slug } from "@/components/install/guides";
+import { fill, type Dictionary } from "@/i18n/dictionaries";
 
 type Platform = {
-  readonly id: string;
+  readonly id: "unix" | "windows";
+  /** OS names, not prose — the same on every locale. */
   readonly label: string;
   /** Shell prompt glyph shown before the command; not part of what is copied. */
   readonly prompt: string;
   /** Verbatim from the omm README install section. */
   readonly command: string;
-  readonly notes: readonly string[];
-  /** Other install routes the README documents for this platform. */
-  readonly alternatives: readonly {
-    readonly caption: string;
-    readonly command: string;
-  }[];
-  /** Long-form per-OS guides under /install. */
-  readonly guides: readonly { readonly label: string; readonly href: string }[];
+  /** Other install routes the README documents for this platform, in the same
+   *  order as the captions in the dictionary. */
+  readonly alternatives: readonly string[];
+  /** Which per-OS guides this tab links to. */
+  readonly guides: readonly Slug[];
 };
 
 /** README "Requirements" on both OS paths: Python 3.10+ and git have to exist
@@ -36,25 +36,11 @@ const PLATFORMS: readonly Platform[] = [
     prompt: "$",
     command:
       "curl -fsSL https://raw.githubusercontent.com/omm-hippo/omm/main/install.sh | sh",
-    notes: [
-      "Open a new shell afterward so your PATH picks up omm.",
-      "Requires Python 3.10+. On Debian and Ubuntu the script installs python3, python3-venv, git and pipx for you through apt; on macOS and other distributions it checks for Python 3.10+ and git and stops if they are missing.",
-    ],
     alternatives: [
-      {
-        caption: "macOS · Homebrew Tap",
-        command: "brew install omm-hippo/omm/omm",
-      },
-      {
-        caption:
-          "Any OS via PyPI, no signature verification — the distribution is omm-model, the command stays omm",
-        command: "pipx install omm-model",
-      },
+      "brew install omm-hippo/omm/omm",
+      "pipx install omm-model",
     ],
-    guides: [
-      { label: "macOS install guide", href: "/install/macos" },
-      { label: "Linux install guide", href: "/install/linux" },
-    ],
+    guides: ["macos", "linux"],
   },
   {
     id: "windows",
@@ -62,25 +48,24 @@ const PLATFORMS: readonly Platform[] = [
     prompt: "PS >",
     command:
       "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; irm https://raw.githubusercontent.com/omm-hippo/omm/main/install.ps1 | iex",
-    notes: [
-      "This must run before irm: script-internal TLS settings are too late for its first download.",
-      "Open a new PowerShell window afterward so your PATH picks up omm.",
-      "Requires Python 3.10+. The script bootstraps Python and git via winget when they are missing.",
-    ],
-    alternatives: [
-      {
-        caption:
-          "Any OS via PyPI, no signature verification — the distribution is omm-model, the command stays omm",
-        command: "pipx install omm-model",
-      },
-    ],
-    guides: [{ label: "Windows install guide", href: "/install/windows" }],
+    alternatives: ["pipx install omm-model"],
+    guides: ["windows"],
   },
 ];
 
 const COPIED_MS = 1200;
 
-export default function InstallTabs() {
+type Props = {
+  readonly t: Dictionary["install"]["tabs"];
+  readonly ui: Dictionary["ui"];
+  readonly guides: readonly {
+    readonly slug: Slug;
+    readonly href: string;
+    readonly label: string;
+  }[];
+};
+
+export default function InstallTabs({ t, ui, guides }: Props) {
   const baseId = useId();
   const [activeId, setActiveId] = useState<string>(PLATFORMS[0].id);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -129,7 +114,7 @@ export default function InstallTabs() {
       <div className="flex justify-center">
         <div
           role="tablist"
-          aria-label="Operating system"
+          aria-label={t.aria}
           onKeyDown={onTabListKeyDown}
           className="inline-flex gap-1 rounded-md border border-line-1 bg-bg-0 p-1"
         >
@@ -167,6 +152,10 @@ export default function InstallTabs() {
         {PLATFORMS.map((platform) => {
           const active = platform.id === activeId;
           const copied = copiedId === platform.id;
+          const copy_ = t[platform.id];
+          const platformGuides = guides.filter((guide) =>
+            platform.guides.includes(guide.slug),
+          );
           return (
             <div
               key={platform.id}
@@ -191,15 +180,15 @@ export default function InstallTabs() {
                 <button
                   type="button"
                   onClick={() => void copy(platform)}
-                  aria-label={`Copy the ${platform.label} install command`}
+                  aria-label={fill(t.copyAria, { what: platform.label })}
                   className="text-label shrink-0 rounded-md border border-line-1 px-3 py-2 text-ink-2 transition-colors duration-[120ms] ease-[var(--ease-micro)] hover:bg-bg-3 hover:text-ink-0"
                 >
-                  <span aria-live="polite">{copied ? "copied" : "copy"}</span>
+                  <span aria-live="polite">{copied ? ui.copied : ui.copy}</span>
                 </button>
               </div>
 
               <ul className="mt-4 flex flex-col gap-2 text-left">
-                {platform.notes.map((note) => (
+                {copy_.notes.map((note) => (
                   <li key={note} className="text-small text-ink-2">
                     {note}
                   </li>
@@ -207,7 +196,7 @@ export default function InstallTabs() {
               </ul>
 
               <p className="text-small mt-2 text-left text-ink-2">
-                Need them first?{" "}
+                {t.needThemFirst}{" "}
                 {DEPENDENCIES.map((dependency, index) => (
                   <span key={dependency.href}>
                     {index > 0 ? " · " : ""}
@@ -224,16 +213,19 @@ export default function InstallTabs() {
               </p>
 
               <div className="mt-8 border-t border-line-0 pt-6 text-left">
-                <p className="text-label">Other ways to install</p>
+                <p className="text-label">{t.otherWays}</p>
                 <div className="mt-4 flex flex-col gap-4">
-                  {platform.alternatives.map((alternative) => (
-                    <div key={alternative.command}>
-                      <p className="text-small mb-2">{alternative.caption}</p>
+                  {platform.alternatives.map((command, index) => (
+                    <div key={command}>
+                      <p className="text-small mb-2">
+                        {copy_.alternatives[index]}
+                      </p>
                       <CommandBlock
                         prompt={platform.prompt}
-                        command={alternative.command}
-                        label={alternative.command}
+                        command={command}
+                        label={command}
                         tone="secondary"
+                        ui={ui}
                       />
                     </div>
                   ))}
@@ -241,7 +233,7 @@ export default function InstallTabs() {
               </div>
 
               <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-left">
-                {platform.guides.map((guide) => (
+                {platformGuides.map((guide) => (
                   <Link
                     key={guide.href}
                     href={guide.href}

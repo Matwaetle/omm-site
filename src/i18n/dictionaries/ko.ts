@@ -1,0 +1,293 @@
+/**
+ * Korean copy. A translation of `./en.ts` — every fact, number and constraint
+ * is the English one; nothing is added, softened or dropped. design/FACTS.md
+ * therefore governs this file exactly as it governs the English.
+ *
+ * GLOSSARY — keep these renderings consistent when editing:
+ *   install 설치 · installer(the one-line script) 설치 스크립트 ·
+ *   uninstall 제거 · run 실행 · command 명령 · terminal 터미널 · shell 셸 ·
+ *   prompt 프롬프트 · runner 러너 · hub 허브 · model 모델 · link 링크하다 ·
+ *   hard link 하드 링크 · symbolic link 심볼릭 링크 ·
+ *   signed commit verification 서명된 커밋 검증 · trust anchor 신뢰 앵커 ·
+ *   staging clone 스테이징 클론 · environment variable 환경 변수 ·
+ *   package manager 패키지 매니저 · dependency 의존성 ·
+ *   setup wizard 설정 마법사 · shell completion 셸 자동 완성 ·
+ *   free space 여유 공간 · budget 예산 · capture 캡처 · issue 이슈
+ *
+ * Left in English on purpose: commands and flags, environment variables, file
+ * paths, verbatim installer output, product and runner names, and the mono
+ * token lines (`MIT · Python 3.10+ · Windows, macOS, Linux`).
+ */
+
+import type { Dictionary } from "@/i18n/dictionaries";
+
+export const ko = {
+  meta: {
+    title: "omm — 오픈소스 모델 매니저",
+    description:
+      "omm은 로컬 LLM(GGUF)을 위한 apt/brew 방식의 패키지 매니저입니다. 모델을 중앙 허브에 설치하고, 로컬 AI 러너 일곱 개에 자동으로 링크하며, 하드웨어에 맞는 모델을 추천할 수 있습니다.",
+  },
+
+  ui: {
+    copy: "복사",
+    copied: "복사됨",
+    copyAria: "복사: {what}",
+  },
+
+  nav: {
+    sections: ["문제", "기능", "러너", "설치"],
+    guides: "가이드",
+    docs: "문서",
+    github: "GitHub",
+    install: "설치",
+    menu: "메뉴",
+    close: "닫기",
+    language: "언어",
+  },
+
+  hero: {
+    eyebrow: "MIT · Python 3.10+ · Windows, macOS, Linux",
+    heading: "GGUF 파일은 허브 하나에. 러너 일곱 개가 자동으로 연결됩니다.",
+    lede: "디스크에는 모델마다 사본 하나만 둔 채 Ollama, LM Studio, Jan, AnythingLLM, Msty, KoboldCpp, text-generation-webui에 링크하고, 무엇이든 내려받기 전에 남은 메모리와 대조해 확인합니다.",
+    cta: "omm 설치하기",
+  },
+
+  terminal: {
+    a11y:
+      "터미널 녹화. omm scan은 이 컴퓨터와 설치된 러너 세 개를 보고하고, " +
+      "omm install은 4.37 GB 양자화 Mistral 7B를 내려받아 링크하며, " +
+      "omm list는 Ollama, LM Studio, Jan에 링크된 파일 하나를 보여줍니다.",
+    footnote:
+      "4.37 GB(십진) = 4.07 GiB — omm list는 GiB를 GB로 표기합니다. 업스트림에 이슈를 등록했습니다.",
+  },
+
+  problem: {
+    label: "디스크의 현재 상태",
+    heading: "러너 넷. 사본 넷. 같은 가중치 17.5 GB.",
+    body: "러너마다 자체 모델 디렉터리를 두고 그 안에 내려받습니다. 이 네 파일이 바이트 단위로 같다는 사실은 디스크 어디에도 기록되지 않으므로, 셋을 지우는 일도 일어나지 않습니다.",
+    total: "사본 4개 · 고유 파일 1개 · 13.11 GB 회수 가능",
+    caption: "omm이 Linux에서 해석하는 경로",
+  },
+
+  features: {
+    hub: {
+      eyebrow: "허브 하나",
+      title: "디스크에는 파일 하나. 러너 일곱 개는 저마다 그 파일을 가졌다고 여깁니다.",
+      body: [
+        "omm은 GGUF를 ",
+        { code: "~/.omm/models" },
+        "에 한 번만 기록하고, 이 컴퓨터에서 찾아낼 수 있는 모든 러너 디렉터리에 링크합니다. 설치되지 않은 러너는 추측하지 않고 건너뛰며, Windows에서는 하드 링크에서 심볼릭 링크로, 다시 여유 공간을 확인한 뒤 자체 사본으로 물러섭니다.",
+      ],
+    },
+    localfit: {
+      eyebrow: "Localfit",
+      title: "대역폭을 쓰기 전에 모델이 들어갈지부터 확인합니다.",
+      body: [
+        "스캔은 전체 RAM, 현재 가용량, GPU 메모리를 읽은 다음 운영체제와 스캔 이후 실행될 앱을 위해 전체 RAM의 10%를 — 최소 1 GB 아래로는 내려가지 않게 — 남겨 둡니다. 안전 예산은 그렇게 빼고 남은 값과 전체 RAM의 80% 중 더 작은 쪽입니다. 스캔을 다시 실행하면 두 값 모두 다시 계산됩니다.",
+      ],
+    },
+    benchmarks: {
+      eyebrow: "벤치마크",
+      title: "문제 여덟 개, 고정된 시드, 반복 표본의 중앙값.",
+      body: [
+        "품질 팩은 버전이 관리되는 이중 언어 팩으로, Ollama에서 temperature 0으로 실행되며 항목마다 숫자 하나를 정답과 대조해 채점합니다. 생성된 텍스트는 저장하지 않고, 결과는 운 좋게 한 번 맞은 값이 아니라 반복 표본의 중앙값으로 보고합니다.",
+      ],
+    },
+    catalogs: {
+      eyebrow: "서명된 카탈로그",
+      title: "교체된 카탈로그는 해시까지 그대로 보관됩니다.",
+      body: [
+        { code: "catalog-trust" },
+        "는 Ed25519 공개 키와 매니페스트 URL을 고정해 두고, 해시나 서명이 맞지 않는 추천 아티팩트는 모두 거부합니다. 교체된 스냅샷은 자체 sha256 이름으로 보관되므로 ",
+        { code: "catalog-rollback" },
+        "로 이전 카탈로그를 되돌릴 수 있습니다.",
+      ],
+    },
+  },
+
+  featureVisuals: {
+    link: {
+      alt: "omm 허브에 있는 GGUF 하나가 설치된 러너 디렉터리 세 곳에 링크되어 있고, 나머지 러너 디렉터리 네 곳은 설치되어 있지 않습니다.",
+      linked: "링크됨",
+      skipped: "미설치 — 건너뜀",
+    },
+    budget: {
+      caption: "RAM 15.5 GB · Intel Core Ultra 7 155H · Windows 11",
+      model: "모델 4.37 GB",
+      inUse: "다른 앱이 사용 중",
+      reserve: "앱/OS용 예약",
+      budget: "안전 모델 예산 — 둘 중 작은 값",
+      cap: "설치 상한 — 전체 RAM의 80%",
+    },
+    bench: {
+      caption: "localfit-gsm8k-bilingual-smoke, 팩 버전 1.1.0 — 여덟 항목 전체",
+      footnote:
+        "localfit-gsm8k-bilingual-smoke 1.1.0 · temperature 0, seed 0, Ollama 전용. 여덟 항목. 리더보드가 아닙니다.",
+    },
+    catalog: {
+      footnote: [
+        "해시가 맞지 않으면 ",
+        { code: "catalog artifact hash does not match manifest" },
+        " 로 중단되고 디스크의 파일은 그대로 남습니다.",
+      ],
+    },
+  },
+
+  runners: {
+    label: "러너 7개 · 플랫폼 3종",
+    heading: "omm은 이 일곱 개에 링크합니다. 어느 것도 대체하지 않습니다.",
+    body: "omm이 다룰 수 있는 패키지 매니저가 있는 플랫폼에서는 설치가 자동화됩니다. 그 밖의 환경에서도 직접 설치한 러너에 모델을 링크하는 일은 그대로 합니다.",
+    columns: {
+      runner: "러너",
+      automated: "자동 설치 대상",
+      manual: "그 외 수동",
+    },
+    manual: [
+      "—",
+      "—",
+      "해당 패키지 매니저가 없는 환경",
+      "Windows, Linux",
+      "Windows, Linux",
+      "Intel Mac 및 기타 아키텍처",
+      "ARM Linux/Windows",
+    ],
+  },
+
+  install: {
+    label: "설치",
+    heading: "한 줄이면 됩니다. 무엇이든 설치하기 전에 서명된 커밋을 검증합니다.",
+    lede: "Windows 10 22H2 이상, macOS 또는 Linux에서 Python 3.10+가 필요합니다. 스크립트가 빠진 것을 채워 넣은 다음, omm을 격리된 pipx CLI로 설치합니다.",
+    whatItDoes: "설치 스크립트가 하는 일",
+    steps: [
+      {
+        title: "스테이징 클론",
+        body: "릴리스는 버전이 붙은 스테이징 디렉터리에 클론되며, 지금 실행 중인 사본 위에 덮어쓰지 않습니다.",
+      },
+      {
+        title: "서명된 커밋 검증",
+        body: "스테이징된 커밋은 어느 부분이든 실행되기 전에 부트스트랩 신뢰 앵커와 대조해 검증됩니다.",
+      },
+      {
+        title: "pipx 전환",
+        body: "그 검증을 통과한 뒤에야 pipx가 스테이징된 트리로 전환하므로, omm은 격리된 CLI로 유지됩니다.",
+      },
+    ],
+    tabs: {
+      aria: "운영체제",
+      copyAria: "{what} 설치 명령 복사",
+      needThemFirst: "먼저 설치해야 하나요?",
+      otherWays: "다른 설치 방법",
+      unix: {
+        notes: [
+          "설치한 다음에는 새 셸을 열어야 PATH에 omm이 반영됩니다.",
+          "Python 3.10+가 필요합니다. Debian과 Ubuntu에서는 스크립트가 apt로 python3, python3-venv, git, pipx를 대신 설치합니다. macOS와 그 밖의 배포판에서는 Python 3.10+와 git이 있는지 확인하고, 없으면 중단합니다.",
+        ],
+        alternatives: [
+          "macOS · Homebrew Tap",
+          "모든 OS · PyPI 경유, 서명 검증 없음 — 배포 이름은 omm-model이고 명령은 그대로 omm입니다",
+        ],
+      },
+      windows: {
+        notes: [
+          "이 부분은 irm보다 먼저 실행되어야 합니다. 스크립트 안에서 TLS를 설정해서는 첫 다운로드에 이미 늦습니다.",
+          "설치한 다음에는 새 PowerShell 창을 열어야 PATH에 omm이 반영됩니다.",
+          "Python 3.10+가 필요합니다. 없으면 스크립트가 winget으로 Python과 git을 설치합니다.",
+        ],
+        alternatives: [
+          "모든 OS · PyPI 경유, 서명 검증 없음 — 배포 이름은 omm-model이고 명령은 그대로 omm입니다",
+        ],
+      },
+      guideLink: "{os} 설치 가이드",
+    },
+  },
+
+  footer: {
+    tagline: "MIT · Python 3.10+ · Windows, macOS, Linux",
+    aria: "푸터",
+    docs: {
+      title: "문서",
+      links: [
+        "Windows 설치 가이드",
+        "macOS 설치 가이드",
+        "Linux 설치 가이드",
+        "README",
+        "지원 플랫폼",
+        "저장 위치",
+        "스크립팅",
+        "호환 프로그램",
+      ],
+    },
+    commands: { title: "명령" },
+    project: {
+      title: "프로젝트",
+      links: ["기여 방법", "행동 강령", "보안 정책", "서드파티 고지", "라이선스"],
+    },
+    source: {
+      title: "소스",
+      links: ["저장소", "이슈", "릴리스", "Wiki"],
+    },
+    license: "MIT 라이선스",
+    build: "빌드 {sha}",
+  },
+
+  installChooser: {
+    metaTitle: "omm 설치",
+    metaDescription:
+      "운영체제를 고르면 단계별 omm 설치 가이드로 이어집니다. 어떤 터미널 앱을 열어야 하는지, 정확한 명령은 무엇인지, 설치 스크립트가 무엇을 검증하는지, 각 오류 메시지가 무엇을 뜻하는지 설명합니다.",
+    label: "설치",
+    heading: "설치할 시스템을 고르세요.",
+    lede: "각 가이드는 어떤 앱을 열어야 하는지 정확히 짚는 것으로 시작합니다. 한 시스템의 설치 명령은 다른 시스템에서 실행되지 않기 때문입니다. 그다음은 명령, 무엇이든 설치하기 전에 검증하는 것, 가장 먼저 실행할 것, 그리고 설치 스크립트가 출력할 수 있는 모든 메시지와 그에 대한 대처입니다.",
+    shortcut: [
+      "터미널이 이미 익숙하다면, 한 줄짜리 명령은 ",
+      "랜딩 페이지",
+      "에 있습니다.",
+    ],
+  },
+
+  guide: {
+    sections: [
+      "어떤 앱을 열어야 하나",
+      "시작하기 전에",
+      "설치",
+      "설치 스크립트가 하는 일",
+      "설치한 다음",
+      "이 시스템의 러너",
+      "저장 위치, 자동 완성, 제거",
+      "문제가 생겼다면",
+    ],
+    breadcrumbAria: "탐색 경로",
+    onThisPage: "이 페이지의 내용",
+    notThisOne: "이 창은 아닙니다 — ",
+    installCommandAria: "{os} 설치 명령",
+    verificationBody:
+      "한 줄짜리 설치 스크립트는 그냥 내려받아 실행하는 것이 아닙니다. 세 가지를 순서대로 수행하며, 가져온 코드가 omm이 서명한 코드가 아니면 두 번째 단계에서 멈춥니다.",
+    verificationNote:
+      "커밋의 진위가 중요하다면, 이 과정을 검증 없는 git clone과 pipx install로 대체하지 마세요.",
+    scanReports: "omm scan이 출력하는 항목",
+    runnersHeading: "{os}의 러너",
+    linkingHeading: "이 시스템에서 omm이 모델을 노출하는 방식",
+    storageHeading: "모델이 저장되는 위치",
+    storageAria: "OMM_HOME 설정",
+    completionHeading: "셸 자동 완성",
+    completionAria: "셸 자동 완성 설치",
+    uninstallHeading: "제거",
+    uninstallAria: "omm 제거",
+    troubleBody:
+      "아래 메시지는 모두 설치 스크립트, 제거 스크립트 또는 셸이 실제로 출력하는 것입니다. 해당하는 메시지를 찾아 원인을 읽고, 마지막 줄대로 하세요.",
+    troubleWhy: "원인",
+    troubleFix: "대처",
+    troubleSource: "출처",
+    stillStuck:
+      "그래도 해결되지 않는다면, 화면에 나온 메시지 그대로와 omm scan 출력을 함께 적어 이슈를 등록하세요.",
+    elsewhere: "다른 문서",
+    installOn: "{os}에 설치",
+    repo: {
+      title: "소스와 README",
+      body: "github.com/omm-hippo/omm — 이슈, 릴리스, 그리고 이 페이지에서 인용한 설치 스크립트.",
+    },
+    wiki: {
+      title: "Wiki",
+      body: "호환 프로그램과 더 긴 형식의 문서.",
+    },
+  },
+} as const satisfies Dictionary;

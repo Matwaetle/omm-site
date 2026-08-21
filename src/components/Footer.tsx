@@ -1,73 +1,68 @@
 import Link from "next/link";
 
+import { fill, getDictionary } from "@/i18n/dictionaries";
+import { localeHref, type Locale } from "@/i18n/config";
+
 const REPO = "https://github.com/omm-hippo/omm";
 
-type FooterLink = {
-  readonly label: string;
-  readonly href: string;
-  /** Route on this site rather than a link out to the omm repo. */
-  readonly internal?: boolean;
-};
-type FooterColumn = {
-  readonly title: string;
-  readonly mono?: boolean;
-  readonly links: readonly FooterLink[];
-};
+/** Every href points at a file, section, or tab that exists in the omm repo.
+ *  Labels live in the dictionary, in this order. */
+const DOCS_HREFS = [
+  { href: "/install/windows", internal: true },
+  { href: "/install/macos", internal: true },
+  { href: "/install/linux", internal: true },
+  { href: `${REPO}#readme`, internal: false },
+  { href: `${REPO}#supported-platforms`, internal: false },
+  { href: `${REPO}#storage-location`, internal: false },
+  { href: `${REPO}#scripting`, internal: false },
+  { href: `${REPO}/wiki/Compatible-Programs`, internal: false },
+] as const;
 
-/** Every href points at a file, section, or tab that exists in the omm repo. */
-const COLUMNS: readonly FooterColumn[] = [
-  {
-    title: "Docs",
-    links: [
-      { label: "Windows install guide", href: "/install/windows", internal: true },
-      { label: "macOS install guide", href: "/install/macos", internal: true },
-      { label: "Linux install guide", href: "/install/linux", internal: true },
-      { label: "README", href: `${REPO}#readme` },
-      { label: "Supported platforms", href: `${REPO}#supported-platforms` },
-      { label: "Storage location", href: `${REPO}#storage-location` },
-      { label: "Scripting", href: `${REPO}#scripting` },
-      {
-        label: "Compatible programs",
-        href: `${REPO}/wiki/Compatible-Programs`,
-      },
-    ],
-  },
-  {
-    title: "Commands",
-    mono: true,
-    links: [
-      { label: "omm scan", href: `${REPO}#usage` },
-      { label: "omm install", href: `${REPO}#usage` },
-      { label: "omm list", href: `${REPO}#usage` },
-      { label: "omm benchmark", href: `${REPO}#self-hosted-benchmark-data` },
-      { label: "omm setting", href: `${REPO}#signed-recommendation-data` },
-    ],
-  },
-  {
-    title: "Project",
-    links: [
-      { label: "Contributing", href: `${REPO}/blob/main/CONTRIBUTING.md` },
-      { label: "Code of conduct", href: `${REPO}/blob/main/CODE_OF_CONDUCT.md` },
-      { label: "Security policy", href: `${REPO}/blob/main/SECURITY.md` },
-      {
-        label: "Third-party notices",
-        href: `${REPO}/blob/main/THIRD_PARTY_NOTICES.md`,
-      },
-      { label: "License", href: `${REPO}/blob/main/LICENSE` },
-    ],
-  },
-  {
-    title: "Source",
-    links: [
-      { label: "Repository", href: REPO },
-      { label: "Issues", href: `${REPO}/issues` },
-      { label: "Releases", href: `${REPO}/releases` },
-      { label: "Wiki", href: `${REPO}/wiki` },
-    ],
-  },
-];
+/** Command names are the product's own vocabulary — never translated. */
+const COMMANDS = [
+  { label: "omm scan", href: `${REPO}#usage` },
+  { label: "omm install", href: `${REPO}#usage` },
+  { label: "omm list", href: `${REPO}#usage` },
+  { label: "omm benchmark", href: `${REPO}#self-hosted-benchmark-data` },
+  { label: "omm setting", href: `${REPO}#signed-recommendation-data` },
+] as const;
 
-export default function Footer() {
+const PROJECT_HREFS = [
+  `${REPO}/blob/main/CONTRIBUTING.md`,
+  `${REPO}/blob/main/CODE_OF_CONDUCT.md`,
+  `${REPO}/blob/main/SECURITY.md`,
+  `${REPO}/blob/main/THIRD_PARTY_NOTICES.md`,
+  `${REPO}/blob/main/LICENSE`,
+] as const;
+
+const SOURCE_HREFS = [
+  REPO,
+  `${REPO}/issues`,
+  `${REPO}/releases`,
+  `${REPO}/wiki`,
+] as const;
+
+const LINK_CLASS =
+  "text-small text-ink-2 transition-colors duration-[120ms] ease-[var(--ease-micro)] hover:text-ink-0";
+
+function Column({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <h3 className="text-label">{title}</h3>
+      <ul className="mt-4 flex flex-col gap-2">{children}</ul>
+    </div>
+  );
+}
+
+export default function Footer({ locale }: { locale: Locale }) {
+  const t = getDictionary(locale).footer;
+
   /* DIRECTION.md §4.7: the bottom row carries the build's real commit
      short-SHA. Vercel injects it at build time; locally it is absent, and the
      row then renders repo + license only rather than a fake placeholder. */
@@ -79,47 +74,73 @@ export default function Footer() {
         <div className="flex flex-col gap-12 lg:flex-row lg:gap-16">
           <div className="shrink-0 lg:w-64">
             <p className="font-mono font-medium lowercase text-ink-0">omm</p>
-            <p className="text-small mt-2">
-              MIT · Python 3.10+ · Windows, macOS, Linux
-            </p>
+            <p className="text-small mt-2">{t.tagline}</p>
           </div>
 
           <nav
-            aria-label="Footer"
+            aria-label={t.aria}
             className="grid flex-1 grid-cols-2 gap-8 sm:grid-cols-4"
           >
-            {COLUMNS.map((column) => (
-              <div key={column.title}>
-                <h3 className="text-label">{column.title}</h3>
-                <ul className="mt-4 flex flex-col gap-2">
-                  {column.links.map((link) => {
-                    const className = `text-small text-ink-2 transition-colors duration-[120ms] ease-[var(--ease-micro)] hover:text-ink-0 ${
-                      column.mono ? "font-mono" : ""
-                    }`;
-                    return (
-                      <li key={link.label}>
-                        {link.internal ? (
-                          <Link href={link.href} className={className}>
-                            {link.label}
-                          </Link>
-                        ) : (
-                          <a href={link.href} className={className}>
-                            {link.label}
-                          </a>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ))}
+            <Column title={t.docs.title}>
+              {DOCS_HREFS.map((entry, index) => (
+                <li key={entry.href}>
+                  {entry.internal ? (
+                    <Link
+                      href={localeHref(entry.href, locale)}
+                      className={LINK_CLASS}
+                    >
+                      {t.docs.links[index]}
+                    </Link>
+                  ) : (
+                    <a href={entry.href} className={LINK_CLASS}>
+                      {t.docs.links[index]}
+                    </a>
+                  )}
+                </li>
+              ))}
+            </Column>
+
+            <Column title={t.commands.title}>
+              {COMMANDS.map((command) => (
+                <li key={command.label}>
+                  <a
+                    href={command.href}
+                    className={`${LINK_CLASS} font-mono`}
+                  >
+                    {command.label}
+                  </a>
+                </li>
+              ))}
+            </Column>
+
+            <Column title={t.project.title}>
+              {PROJECT_HREFS.map((href, index) => (
+                <li key={href}>
+                  <a href={href} className={LINK_CLASS}>
+                    {t.project.links[index]}
+                  </a>
+                </li>
+              ))}
+            </Column>
+
+            <Column title={t.source.title}>
+              {SOURCE_HREFS.map((href, index) => (
+                <li key={href}>
+                  <a href={href} className={LINK_CLASS}>
+                    {t.source.links[index]}
+                  </a>
+                </li>
+              ))}
+            </Column>
           </nav>
         </div>
 
         <div className="mt-12 flex flex-wrap gap-x-6 gap-y-2 border-t border-line-0 pt-6">
           <span className="text-label">github.com/omm-hippo/omm</span>
-          <span className="text-label">MIT license</span>
-          {sha ? <span className="text-label">build {sha}</span> : null}
+          <span className="text-label">{t.license}</span>
+          {sha ? (
+            <span className="text-label">{fill(t.build, { sha })}</span>
+          ) : null}
         </div>
       </div>
     </footer>

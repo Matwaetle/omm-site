@@ -125,20 +125,44 @@ competitor's palette, it reaches ~11:1 against `#0A0A0A`, and it means something
 product instead of being decoration. Purple, violet, indigo, cyan and Supabase-green are
 banned from the stylesheet.
 
-### Fonts (Google Fonts only, both loadable via `next/font/google`)
+### Fonts
 
-| Role | Family | `next/font/google` import | Weights / axes |
+| Role | Family | Loaded via | Weights / axes |
 |---|---|---|---|
 | Display + UI + body | **Archivo** | `Archivo` | variable 400/500/600/700, `wdth` 87–100 |
-| Mono / terminal / labels | **JetBrains Mono** | `JetBrains_Mono` | 400, 500, 700 |
+| Mono / terminal / labels | **JetBrains Mono** | self-hosted `localFont`, `src/fonts/` | 400, 500, 700 |
+| Hangul fallback only (`/ko`) | **Noto Sans KR** | `Noto_Sans_KR` | 400, 500, 600, 700, `preload: false` |
 
 Archivo (Omnibus-Type) is an industrial grotesque with a tall x-height and closed apertures —
 it reads engineered at 76px and stays legible at 16px, so it carries the whole page. Its
 `wdth` axis at 90 gives the hero a slightly condensed, plated-metal feel that Inter cannot do.
 JetBrains Mono is the font a large share of the audience already has open in their editor,
-which is exactly why the terminal should be set in it. **Inter is not permitted anywhere.**
-Set `--font-sans: var(--font-archivo), system-ui, sans-serif` and
-`--font-mono: var(--font-jetbrains), ui-monospace, monospace`.
+which is exactly why the terminal should be set in it; it is served from `src/fonts/` rather
+than from Google because the Google latin subset drops the box-drawing block the terminal
+tables need. **Inter is not permitted anywhere.**
+
+**Hangul exception (added with `/ko`).** Neither Archivo nor JetBrains Mono ships Hangul, so
+the Korean pages would otherwise fall through to whatever the OS picks. Noto Sans KR is added
+as the *last* named family in both stacks, never the first:
+
+```css
+--stack-sans: var(--font-archivo), var(--font-noto-kr), system-ui, sans-serif;
+--stack-mono: var(--font-jetbrains), var(--font-noto-kr), ui-monospace, monospace;
+```
+
+Latin letters, digits, punctuation and the box-drawing block all exist in the first family, so
+they never reach Noto and the English pages — and every terminal capture on both — render
+byte-identically to before. This is the only permitted third family, it is loaded with
+`preload: false`, and it must never be named first in a stack or used for Latin text.
+
+**`:lang(ko)` type corrections** (in `globals.css`, never per component): the scale's negative
+tracking is drawn for Archivo's Latin apertures and collapses Hangul syllable blocks, and the
+0.94 display leading leaves no room for the taller Hangul glyph box. Korean therefore overrides
+tracking (`display` −0.01em, `h2`/`h3`/`lede` 0, `label` +0.06em) and leading (`display` 1.08,
+`h2` 1.25, `h3` 1.4, `lede` 1.65, `small` 1.6, body 1.7). Sizes are unchanged, so the measure
+and the grid stay identical. Korean also sets `word-break: keep-all` with
+`overflow-wrap: anywhere` — Hangul has no intra-word spaces, so the default rules split tokens
+mid-word — and `pre`/`code` opt back out so literal output scrolls instead of wrapping.
 
 ### Type scale (px, desktop → mobile)
 
@@ -381,8 +405,10 @@ row, no "Made with ❤️".
 5. **No glass, no elevation shadows.** `backdrop-filter` count is zero. `box-shadow` is used
    only as `inset 0 0 0 1px` hairlines and for `:focus-visible` rings — no offset/blur shadow
    anywhere.
-6. **Two font families only.** The network panel loads exactly Archivo and JetBrains Mono.
-   The string `Inter` does not appear in the codebase.
+6. **Two font families only** — three on `/ko`, where Noto Sans KR is loaded as the Hangul
+   fallback and appears last in both stacks (see §3). On the unprefixed English pages the
+   network panel still loads exactly Archivo and JetBrains Mono. The string `Inter` does not
+   appear in the codebase.
 7. **No emoji, no generic icon-cards.** Zero emoji characters in JSX/content. No component
    renders a repeated `{icon, title, body}` tuple in a 3-column grid.
 8. **Asymmetry is measurable.** At ≥1024px, at least three sections have their primary content

@@ -6,7 +6,13 @@ import { useEffect, useRef, useState } from "react";
 const COMMAND =
   "curl -fsSL https://raw.githubusercontent.com/omm-hippo/omm/main/install.sh | sh";
 
-export default function HeroCommand() {
+export default function HeroCommand({
+  copy: copyLabel,
+  copied: copiedLabel,
+}: {
+  readonly copy: string;
+  readonly copied: string;
+}) {
   const [copied, setCopied] = useState(false);
   const timer = useRef(0);
 
@@ -34,7 +40,7 @@ export default function HeroCommand() {
         onClick={copy}
         className="shrink-0 rounded-sm border border-line-1 px-2 py-1 font-mono text-[11px] text-ink-2 transition-colors duration-[120ms] ease-micro hover:bg-bg-3 hover:text-ink-0"
       >
-        <span aria-live="polite">{copied ? "copied" : "copy"}</span>
+        <span aria-live="polite">{copied ? copiedLabel : copyLabel}</span>
       </button>
     </div>
   );
