@@ -1,26 +1,6 @@
 import InstallTabs from "@/components/InstallTabs";
+import { INSTALLER_STEPS } from "@/components/install/installer-steps";
 import Reveal from "@/components/Reveal";
-
-/** README: "Both installers clone to a versioned staging directory, verify the
- *  signed commit against a bootstrap trust anchor, and only then switch pipx to it." */
-const INSTALLER_STEPS: readonly { step: string; title: string; body: string }[] =
-  [
-    {
-      step: "01",
-      title: "staging clone",
-      body: "The release is cloned into a versioned staging directory, never over the copy you are currently running.",
-    },
-    {
-      step: "02",
-      title: "signed commit verified",
-      body: "The staged commit is checked against a bootstrap trust anchor before any of it is executed.",
-    },
-    {
-      step: "03",
-      title: "pipx switch",
-      body: "Only after that does pipx switch to the staged tree, so omm stays an isolated CLI.",
-    },
-  ];
 
 export default function Install() {
   return (

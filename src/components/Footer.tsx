@@ -1,6 +1,13 @@
+import Link from "next/link";
+
 const REPO = "https://github.com/omm-hippo/omm";
 
-type FooterLink = { readonly label: string; readonly href: string };
+type FooterLink = {
+  readonly label: string;
+  readonly href: string;
+  /** Route on this site rather than a link out to the omm repo. */
+  readonly internal?: boolean;
+};
 type FooterColumn = {
   readonly title: string;
   readonly mono?: boolean;
@@ -12,6 +19,9 @@ const COLUMNS: readonly FooterColumn[] = [
   {
     title: "Docs",
     links: [
+      { label: "Windows install guide", href: "/install/windows", internal: true },
+      { label: "macOS install guide", href: "/install/macos", internal: true },
+      { label: "Linux install guide", href: "/install/linux", internal: true },
       { label: "README", href: `${REPO}#readme` },
       { label: "Supported platforms", href: `${REPO}#supported-platforms` },
       { label: "Storage location", href: `${REPO}#storage-location` },
@@ -82,18 +92,24 @@ export default function Footer() {
               <div key={column.title}>
                 <h3 className="text-label">{column.title}</h3>
                 <ul className="mt-4 flex flex-col gap-2">
-                  {column.links.map((link) => (
-                    <li key={link.label}>
-                      <a
-                        href={link.href}
-                        className={`text-small text-ink-2 transition-colors duration-[120ms] ease-[var(--ease-micro)] hover:text-ink-0 ${
-                          column.mono ? "font-mono" : ""
-                        }`}
-                      >
-                        {link.label}
-                      </a>
-                    </li>
-                  ))}
+                  {column.links.map((link) => {
+                    const className = `text-small text-ink-2 transition-colors duration-[120ms] ease-[var(--ease-micro)] hover:text-ink-0 ${
+                      column.mono ? "font-mono" : ""
+                    }`;
+                    return (
+                      <li key={link.label}>
+                        {link.internal ? (
+                          <Link href={link.href} className={className}>
+                            {link.label}
+                          </Link>
+                        ) : (
+                          <a href={link.href} className={className}>
+                            {link.label}
+                          </a>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             ))}
