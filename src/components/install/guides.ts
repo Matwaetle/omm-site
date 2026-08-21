@@ -25,7 +25,20 @@ export type PromptSample = {
   readonly ok: boolean;
 };
 
-export type Requirement = { readonly label: string; readonly body: string };
+export type Requirement = {
+  readonly label: string;
+  readonly body: string;
+  /** Where to get the thing, when it is something the reader has to install. */
+  readonly links?: readonly { readonly label: string; readonly href: string }[];
+};
+
+/** An install route other than the one the page leads with. */
+export type AltInstall = {
+  readonly heading: string;
+  readonly body: string;
+  readonly commands: readonly Command[];
+  readonly notes: readonly string[];
+};
 
 export type AfterStep = {
   readonly step: string;
@@ -75,11 +88,7 @@ export type Guide = {
     readonly body: string;
     readonly command: Command;
     readonly notes: readonly string[];
-    readonly alt: {
-      readonly body: string;
-      readonly commands: readonly Command[];
-      readonly notes: readonly string[];
-    };
+    readonly alts: readonly AltInstall[];
   };
 
   readonly after: {
@@ -168,14 +177,25 @@ const WINDOWS: Guide = {
       {
         label: "Python 3.10+",
         body: "Required. If no suitable Python is on PATH, the installer asks winget to install Python 3.12 and then looks again.",
+        links: [
+          { label: "python.org/downloads", href: "https://www.python.org/downloads/" },
+        ],
       },
       {
         label: "git",
         body: "Required, because omm is installed from a verified Git checkout. If it is missing, the installer asks winget for MinGit.",
+        links: [
+          { label: "git-scm.com/downloads", href: "https://git-scm.com/downloads" },
+        ],
       },
       {
         label: "winget",
         body: "Built into Windows 10 2004 and later and into Windows 11. On anything older it is absent, so install Python 3.10+ and git yourself first — the installer will not be able to.",
+        links: [
+          { label: "winget documentation", href: "https://learn.microsoft.com/en-us/windows/package-manager/winget/" },
+          { label: "python.org/downloads", href: "https://www.python.org/downloads/" },
+          { label: "git-scm.com/downloads", href: "https://git-scm.com/downloads" },
+        ],
       },
       {
         label: "Windows baseline",
@@ -199,22 +219,26 @@ const WINDOWS: Guide = {
       "irm downloads the script and iex runs it. Both are PowerShell commands, which is why the tab has to be PowerShell.",
       "Open a new PowerShell window afterward so your PATH picks up omm.",
     ],
-    alt: {
-      body: "There is also a plain package install from PyPI. It skips the signed-commit check that the script above performs, and it is the right choice if you already manage your Python tooling.",
-      commands: [
-        { prompt: "PS >", command: "python -m pip install omm-model" },
-        {
-          prompt: "PS >",
-          command: "pipx install omm-model",
-          caption: "For an isolated command-line installation, pipx is recommended",
-        },
-      ],
-      notes: [
-        "The distribution name is omm-model; the installed command and Python import remain omm.",
-        "Upgrade and remove it with the same tool that installed it: python -m pip install --upgrade omm-model, or pipx upgrade omm-model.",
-        "omm update only updates a canonical omm Git-source installation. On a pip or pipx install it changes nothing and prints the matching package manager command instead. The Git-only beta channel is likewise unavailable to package-managed installations.",
-      ],
-    },
+    alts: [
+      {
+        heading: "Or install the package",
+        body: "There is also a plain package install from PyPI. It skips the signed-commit check that the script above performs, and it is the right choice if you already manage your Python tooling.",
+        commands: [
+          { prompt: "PS >", command: "python -m pip install omm-model" },
+          {
+            prompt: "PS >",
+            command: "pipx install omm-model",
+            caption: "For an isolated command-line installation, pipx is recommended",
+          },
+        ],
+        notes: [
+          "The distribution name is omm-model; the installed command and Python import remain omm.",
+          "Upgrade and remove it with the same tool that installed it: python -m pip install --upgrade omm-model, or pipx upgrade omm-model. Both preserve downloaded models and settings under OMM_HOME.",
+          "This does not go through the signed-commit verification described above; it relies on PyPI's own account security and TLS, the same trust model as installing any other PyPI package.",
+          "omm update only updates a canonical omm Git-source installation. On a pip or pipx install it changes nothing and prints the matching package manager command instead. The Git-only beta channel is likewise unavailable to package-managed installations.",
+        ],
+      },
+    ],
   },
 
   after: {
@@ -473,18 +497,21 @@ const MACOS: Guide = {
       {
         label: "Python 3.10+",
         body: "Required, and this is the one that usually bites. The python3 that comes with macOS is older than 3.10 on most systems. Install a current Python from python.org, or with Homebrew, before running the installer.",
+        links: [
+          { label: "python.org/downloads", href: "https://www.python.org/downloads/" },
+          { label: "brew.sh", href: "https://brew.sh" },
+        ],
       },
       {
         label: "git",
         body: "Required. macOS ships a git stub that opens Apple's Command Line Tools installer the first time you run it; accept that dialog, or run xcode-select --install yourself.",
+        links: [
+          { label: "git-scm.com/downloads", href: "https://git-scm.com/downloads" },
+        ],
       },
       {
         label: "pipx",
         body: "The installer installs pipx for you through the exact Python it validated, retrying with --break-system-packages when a Homebrew or PEP 668 Python refuses a plain --user install.",
-      },
-      {
-        label: "NVIDIA extra",
-        body: "Skipped on macOS: the optional NVIDIA detector is only pulled in when nvidia-smi reports a driver.",
       },
     ],
   },
@@ -500,22 +527,48 @@ const MACOS: Guide = {
       "Open a new shell afterward so your PATH picks up omm.",
       "The -f and -s flags make curl silent on failure. If nothing at all happens, see the troubleshooting section below.",
     ],
-    alt: {
-      body: "There is also a plain package install from PyPI. It skips the signed-commit check that the script above performs, and it is the right choice if you already manage your Python tooling.",
-      commands: [
-        { prompt: "$", command: "python -m pip install omm-model" },
-        {
-          prompt: "$",
-          command: "pipx install omm-model",
-          caption: "For an isolated command-line installation, pipx is recommended",
-        },
-      ],
-      notes: [
-        "The distribution name is omm-model; the installed command and Python import remain omm.",
-        "Upgrade and remove it with the same tool that installed it: python -m pip install --upgrade omm-model, or pipx upgrade omm-model.",
-        "omm update only updates a canonical omm Git-source installation. On a pip or pipx install it changes nothing and prints the matching package manager command instead. The Git-only beta channel is likewise unavailable to package-managed installations.",
-      ],
-    },
+    alts: [
+      {
+        heading: "Or install from the Homebrew Tap",
+        body: "omm publishes a Homebrew Tap. Use it if Homebrew is already how you manage command-line tools on this Mac.",
+        commands: [
+          {
+            prompt: "$",
+            command: "brew install omm-hippo/omm/omm",
+            caption: "macOS · Homebrew Tap",
+          },
+          {
+            prompt: "$",
+            command: "brew upgrade omm-hippo/omm/omm",
+            caption: "Upgrade or remove the formula with Homebrew",
+          },
+          { prompt: "$", command: "brew uninstall omm-hippo/omm/omm" },
+        ],
+        notes: [
+          "Removing the formula preserves downloaded models and settings under OMM_HOME.",
+          "The Homebrew formula and PyPI package can move on separate release schedules; use brew info omm-hippo/omm/omm to see the version currently provided by the Tap.",
+          "omm update does not modify a Homebrew installation and instead prints the matching brew upgrade command.",
+        ],
+      },
+      {
+        heading: "Or install the package",
+        body: "There is also a plain package install from PyPI. It skips the signed-commit check that the script above performs, and it is the right choice if you already manage your Python tooling.",
+        commands: [
+          { prompt: "$", command: "python -m pip install omm-model" },
+          {
+            prompt: "$",
+            command: "pipx install omm-model",
+            caption: "For an isolated command-line installation, pipx is recommended",
+          },
+        ],
+        notes: [
+          "The distribution name is omm-model; the installed command and Python import remain omm.",
+          "Upgrade and remove it with the same tool that installed it: python -m pip install --upgrade omm-model, or pipx upgrade omm-model. Both preserve downloaded models and settings under OMM_HOME.",
+          "This does not go through the signed-commit verification described above; it relies on PyPI's own account security and TLS, the same trust model as installing any other PyPI package.",
+          "omm update only updates a canonical omm Git-source installation. On a pip or pipx install it changes nothing and prints the matching package manager command instead. The Git-only beta channel is likewise unavailable to package-managed installations.",
+        ],
+      },
+    ],
   },
 
   after: {
@@ -734,10 +787,16 @@ const LINUX: Guide = {
       {
         label: "Python 3.10+",
         body: "Required. On a system with apt the installer runs apt-get install python3 python3-venv python3-pip when python3 is missing. Elsewhere, install it yourself first.",
+        links: [
+          { label: "python.org/downloads", href: "https://www.python.org/downloads/" },
+        ],
       },
       {
         label: "git",
         body: "Required, because omm is installed from a verified Git checkout. With apt present the installer adds git and ca-certificates for you.",
+        links: [
+          { label: "git-scm.com/downloads", href: "https://git-scm.com/downloads" },
+        ],
       },
       {
         label: "python3-venv",
@@ -765,22 +824,26 @@ const LINUX: Guide = {
       "Open a new shell afterward so your PATH picks up omm.",
       "The -f and -s flags make curl silent on failure. If nothing at all happens, see the troubleshooting section below.",
     ],
-    alt: {
-      body: "There is also a plain package install from PyPI. It skips the signed-commit check that the script above performs, and it is the right choice if you already manage your Python tooling.",
-      commands: [
-        { prompt: "$", command: "python -m pip install omm-model" },
-        {
-          prompt: "$",
-          command: "pipx install omm-model",
-          caption: "For an isolated command-line installation, pipx is recommended",
-        },
-      ],
-      notes: [
-        "The distribution name is omm-model; the installed command and Python import remain omm.",
-        "Upgrade and remove it with the same tool that installed it: python -m pip install --upgrade omm-model, or pipx upgrade omm-model.",
-        "omm update only updates a canonical omm Git-source installation. On a pip or pipx install it changes nothing and prints the matching package manager command instead. The Git-only beta channel is likewise unavailable to package-managed installations.",
-      ],
-    },
+    alts: [
+      {
+        heading: "Or install the package",
+        body: "There is also a plain package install from PyPI. It skips the signed-commit check that the script above performs, and it is the right choice if you already manage your Python tooling.",
+        commands: [
+          { prompt: "$", command: "python -m pip install omm-model" },
+          {
+            prompt: "$",
+            command: "pipx install omm-model",
+            caption: "For an isolated command-line installation, pipx is recommended",
+          },
+        ],
+        notes: [
+          "The distribution name is omm-model; the installed command and Python import remain omm.",
+          "Upgrade and remove it with the same tool that installed it: python -m pip install --upgrade omm-model, or pipx upgrade omm-model. Both preserve downloaded models and settings under OMM_HOME.",
+          "This does not go through the signed-commit verification described above; it relies on PyPI's own account security and TLS, the same trust model as installing any other PyPI package.",
+          "omm update only updates a canonical omm Git-source installation. On a pip or pipx install it changes nothing and prints the matching package manager command instead. The Git-only beta channel is likewise unavailable to package-managed installations.",
+        ],
+      },
+    ],
   },
 
   after: {

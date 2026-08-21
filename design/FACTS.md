@@ -80,6 +80,49 @@ Source of truth for these three pages is the omm product repo at
 `src/components/install/guides.ts`; every string below is quoted, not paraphrased.
 Line numbers are as of 2026-08-21 (`pyproject.toml` version `0.2.124`).
 
+### README revision this content tracks
+The README's install section was rewritten per-OS in omm-hippo PR #157
+(`origin/main` at `316f37e`), and now links back to these three pages. Line
+numbers below are against that revision.
+
+### Alternative install routes
+- **Homebrew Tap (macOS only)** — `brew install omm-hippo/omm/omm`,
+  `brew upgrade omm-hippo/omm/omm`, `brew uninstall omm-hippo/omm/omm`, all
+  verbatim from README "### macOS" step 5 "Homebrew Tap (alternative)"
+  (README ~81-98). The three notes on the macOS guide are that section's own
+  wording: removing the formula "preserves downloaded models and settings under
+  `OMM_HOME`"; "The Homebrew formula and PyPI package can move on separate
+  release schedules; use `brew info omm-hippo/omm/omm` to see the version
+  currently provided by the Tap"; "`omm update` does not modify a Homebrew
+  installation and instead prints the matching `brew upgrade` command". Shown
+  on the macOS guide and on the landing page's macOS/Linux tab only — the Tap
+  is a macOS route, and README lists it under "### macOS".
+- **PyPI / pipx (any OS)** — `python -m pip install omm-model`,
+  `pipx install omm-model`, plus the upgrade/uninstall pairs, from README
+  "### Any OS via PyPI or pipx" (~165-195), including "This does not go through
+  the signed-commit verification described below; it relies on PyPI's own
+  account security and TLS, the same trust model as installing any other PyPI
+  package", "The distribution name is `omm-model`; the installed command and
+  Python import remain `omm`", and "Both commands preserve downloaded models
+  and settings under `OMM_HOME`". Shown on both landing-page tabs and on all
+  three guides.
+- **winget is deliberately absent.** There is no `winget install` command for
+  omm itself anywhere in the README — the only `winget` mentions are the
+  installer's own Python/git bootstrap (README ~19), the troubleshooting row
+  for older Windows (~216), and Jan's runner entry (~253). Packaging omm for
+  winget is omm-hippo issue #88 and still open, so no winget install block may
+  appear on the site until a command exists to quote.
+
+### Dependency links (per-OS guides, and one line under the landing-page tabs)
+Both URLs are the ones the README itself links: `https://www.python.org/downloads/`
+and `https://git-scm.com/downloads` (README ~19 for Windows, ~66 for macOS,
+~126 for Linux). The Windows `winget` requirement row links README ~19's
+`https://learn.microsoft.com/en-us/windows/package-manager/winget/`, and the
+macOS Python row adds `https://brew.sh`, since README ~66 offers Homebrew as
+the alternative Python source. The macOS guide has no "NVIDIA extra"
+requirement row: the optional detector is gated on `nvidia-smi`, which no
+current Mac reports, so the row was dropped there and kept on Windows and Linux.
+
 ### README sections used
 - **Install** — the two Git-source commands, the Windows TLS caveat verbatim,
   the PyPI/pipx commands, "The distribution name is `omm-model`; the installed

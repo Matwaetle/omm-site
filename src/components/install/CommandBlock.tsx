@@ -10,6 +10,12 @@ type Props = {
   readonly command: string;
   /** Describes the command for screen readers on the copy button. */
   readonly label: string;
+  /**
+   * `secondary` recedes one surface step and one ink step, for alternative
+   * installs sitting under the command a page actually recommends. Same
+   * geometry, so the two never read as different components.
+   */
+  readonly tone?: "primary" | "secondary";
 };
 
 /**
@@ -17,7 +23,13 @@ type Props = {
  * the guide pages present commands in exactly the same block rather than in a
  * second, docs-flavoured style. Same 1.2s `copied` label, no toast, no icon.
  */
-export default function CommandBlock({ prompt, command, label }: Props) {
+export default function CommandBlock({
+  prompt,
+  command,
+  label,
+  tone = "primary",
+}: Props) {
+  const secondary = tone === "secondary";
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -41,11 +53,17 @@ export default function CommandBlock({ prompt, command, label }: Props) {
   }, [command]);
 
   return (
-    <div className="flex items-start gap-4 rounded-lg border border-line-0 bg-bg-1 p-4">
+    <div
+      className={`flex items-start gap-4 rounded-lg border border-line-0 ${
+        secondary ? "bg-bg-0 p-3" : "bg-bg-1 p-4"
+      }`}
+    >
       <pre className="text-terminal min-w-0 flex-1 overflow-x-auto py-2 text-left">
         <code>
-          <span className="text-accent select-none">{prompt} </span>
-          <span className="text-ink-0">{command}</span>
+          <span className={secondary ? "text-ink-3 select-none" : "text-accent select-none"}>
+            {prompt}{" "}
+          </span>
+          <span className={secondary ? "text-ink-1" : "text-ink-0"}>{command}</span>
         </code>
       </pre>
       <button

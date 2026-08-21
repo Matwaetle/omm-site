@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
+import CommandBlock from "@/components/install/CommandBlock";
+
 type Platform = {
   readonly id: string;
   readonly label: string;
@@ -11,9 +13,21 @@ type Platform = {
   /** Verbatim from the omm README install section. */
   readonly command: string;
   readonly notes: readonly string[];
+  /** Other install routes the README documents for this platform. */
+  readonly alternatives: readonly {
+    readonly caption: string;
+    readonly command: string;
+  }[];
   /** Long-form per-OS guides under /install. */
   readonly guides: readonly { readonly label: string; readonly href: string }[];
 };
+
+/** README "Requirements" on both OS paths: Python 3.10+ and git have to exist
+ *  before the one-liner can do anything. */
+const DEPENDENCIES = [
+  { label: "python.org/downloads", href: "https://www.python.org/downloads/" },
+  { label: "git-scm.com/downloads", href: "https://git-scm.com/downloads" },
+] as const;
 
 const PLATFORMS: readonly Platform[] = [
   {
@@ -25,6 +39,17 @@ const PLATFORMS: readonly Platform[] = [
     notes: [
       "Open a new shell afterward so your PATH picks up omm.",
       "Requires Python 3.10+. On Debian and Ubuntu the script installs python3, python3-venv, git and pipx for you through apt; on macOS and other distributions it checks for Python 3.10+ and git and stops if they are missing.",
+    ],
+    alternatives: [
+      {
+        caption: "macOS · Homebrew Tap",
+        command: "brew install omm-hippo/omm/omm",
+      },
+      {
+        caption:
+          "Any OS via PyPI, no signature verification — the distribution is omm-model, the command stays omm",
+        command: "pipx install omm-model",
+      },
     ],
     guides: [
       { label: "macOS install guide", href: "/install/macos" },
@@ -41,6 +66,13 @@ const PLATFORMS: readonly Platform[] = [
       "This must run before irm: script-internal TLS settings are too late for its first download.",
       "Open a new PowerShell window afterward so your PATH picks up omm.",
       "Requires Python 3.10+. The script bootstraps Python and git via winget when they are missing.",
+    ],
+    alternatives: [
+      {
+        caption:
+          "Any OS via PyPI, no signature verification — the distribution is omm-model, the command stays omm",
+        command: "pipx install omm-model",
+      },
     ],
     guides: [{ label: "Windows install guide", href: "/install/windows" }],
   },
@@ -174,7 +206,41 @@ export default function InstallTabs() {
                 ))}
               </ul>
 
-              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-left">
+              <p className="text-small mt-2 text-left text-ink-2">
+                Need them first?{" "}
+                {DEPENDENCIES.map((dependency, index) => (
+                  <span key={dependency.href}>
+                    {index > 0 ? " · " : ""}
+                    <a
+                      href={dependency.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-mono border-b border-line-1 pb-0.5 transition-colors duration-[120ms] ease-[var(--ease-micro)] hover:border-accent hover:text-ink-0"
+                    >
+                      {dependency.label}
+                    </a>
+                  </span>
+                ))}
+              </p>
+
+              <div className="mt-8 border-t border-line-0 pt-6 text-left">
+                <p className="text-label">Other ways to install</p>
+                <div className="mt-4 flex flex-col gap-4">
+                  {platform.alternatives.map((alternative) => (
+                    <div key={alternative.command}>
+                      <p className="text-small mb-2">{alternative.caption}</p>
+                      <CommandBlock
+                        prompt={platform.prompt}
+                        command={alternative.command}
+                        label={alternative.command}
+                        tone="secondary"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-left">
                 {platform.guides.map((guide) => (
                   <Link
                     key={guide.href}
