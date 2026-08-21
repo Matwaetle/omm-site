@@ -56,6 +56,29 @@ function Row({ children }: { children: React.ReactNode }) {
   return <li className="border-b border-line-0 py-4">{children}</li>;
 }
 
+function LinkRow({
+  links,
+}: {
+  links: readonly { readonly label: string; readonly href: string }[];
+}) {
+  return (
+    <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+      {links.map((link) => (
+        <li key={link.href}>
+          <a
+            href={link.href}
+            target="_blank"
+            rel="noreferrer"
+            className="text-table border-b border-line-1 pb-0.5 text-ink-2 transition-colors duration-[120ms] ease-[var(--ease-micro)] hover:border-accent hover:text-ink-0"
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function NoteList({ notes }: { notes: readonly string[] }) {
   return (
     <ul className="mt-4 flex flex-col gap-2">
@@ -68,7 +91,15 @@ function NoteList({ notes }: { notes: readonly string[] }) {
   );
 }
 
-function CommandGroup({ items, label }: { items: readonly Command[]; label: string }) {
+function CommandGroup({
+  items,
+  label,
+  tone,
+}: {
+  items: readonly Command[];
+  label: string;
+  tone?: "primary" | "secondary";
+}) {
   return (
     <div className="mt-6 flex flex-col gap-4">
       {items.map((item) => (
@@ -80,6 +111,7 @@ function CommandGroup({ items, label }: { items: readonly Command[]; label: stri
             prompt={item.prompt}
             command={item.command}
             label={`${label} — ${item.command}`}
+            tone={tone}
           />
         </div>
       ))}
@@ -224,9 +256,12 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                         <span className="text-terminal text-ink-0">
                           {requirement.label}
                         </span>
-                        <span className="text-small max-w-[68ch]">
-                          {requirement.body}
-                        </span>
+                        <div className="max-w-[68ch]">
+                          <span className="text-small">{requirement.body}</span>
+                          {requirement.links ? (
+                            <LinkRow links={requirement.links} />
+                          ) : null}
+                        </div>
                       </div>
                     </Row>
                   ))}
@@ -257,15 +292,18 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                 </div>
                 <NoteList notes={guide.install.notes} />
 
-                <h3 className="text-h3 mt-12">Or install the package</h3>
-                <p className="text-small mt-3 max-w-[68ch]">
-                  {guide.install.alt.body}
-                </p>
-                <CommandGroup
-                  items={guide.install.alt.commands}
-                  label={`${guide.os} package install`}
-                />
-                <NoteList notes={guide.install.alt.notes} />
+                {guide.install.alts.map((alt) => (
+                  <div key={alt.heading}>
+                    <h3 className="text-h3 mt-12">{alt.heading}</h3>
+                    <p className="text-small mt-3 max-w-[68ch]">{alt.body}</p>
+                    <CommandGroup
+                      items={alt.commands}
+                      label={`${guide.os} — ${alt.heading}`}
+                      tone="secondary"
+                    />
+                    <NoteList notes={alt.notes} />
+                  </div>
+                ))}
               </Reveal>
             </section>
 
