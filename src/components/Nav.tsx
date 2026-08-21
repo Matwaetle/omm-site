@@ -3,17 +3,19 @@
 import Link from "next/link";
 import { useState } from "react";
 
-/** Real published version — omm-hippo/pyproject.toml `version = "0.2.106"`. */
-const VERSION = "v0.2.106";
+/** Real published version — omm-hippo origin/main `pyproject.toml`
+ *  `version = "0.2.148"`, which is also the v0.2.148 tag. */
+const VERSION = "v0.2.148";
 const REPO = "https://github.com/omm-hippo/omm";
 const WIKI = `${REPO}/wiki`;
 
 /** Section ids are owned by the other section components. */
+/* Absolute so the same nav works from /install/* as well as from "/". */
 const SECTIONS = [
-  { label: "Problem", href: "#problem" },
-  { label: "Features", href: "#features" },
-  { label: "Runners", href: "#runners" },
-  { label: "Install", href: "#install" },
+  { label: "Problem", href: "/#problem" },
+  { label: "Features", href: "/#features" },
+  { label: "Runners", href: "/#runners" },
+  { label: "Install", href: "/#install" },
 ] as const;
 
 const LINK =
@@ -42,6 +44,9 @@ export default function Nav() {
               {s.label}
             </a>
           ))}
+          <Link href="/install" className={LINK}>
+            Guides
+          </Link>
           <a href={WIKI} className={LINK} target="_blank" rel="noreferrer">
             Docs
           </a>
@@ -51,12 +56,12 @@ export default function Nav() {
           <a href={REPO} className={LINK} target="_blank" rel="noreferrer">
             GitHub
           </a>
-          <a
-            href="#install"
+          <Link
+            href="/#install"
             className="focus-ring-neutral rounded-md bg-accent px-4 py-1.5 text-small font-medium text-accent-ink transition-colors duration-[120ms] ease-micro hover:bg-accent-press"
           >
             Install
-          </a>
+          </Link>
         </div>
 
         <button
@@ -84,6 +89,13 @@ export default function Nav() {
                 {s.label}
               </a>
             ))}
+            <Link
+              href="/install"
+              onClick={() => setOpen(false)}
+              className="border-b border-line-0 py-3 text-small text-ink-2"
+            >
+              Guides
+            </Link>
             <a
               href={WIKI}
               target="_blank"
@@ -100,13 +112,13 @@ export default function Nav() {
             >
               GitHub
             </a>
-            <a
-              href="#install"
+            <Link
+              href="/#install"
               onClick={() => setOpen(false)}
               className="focus-ring-neutral mt-4 mb-2 rounded-md bg-accent px-4 py-2 text-center text-small font-medium text-accent-ink"
             >
               Install
-            </a>
+            </Link>
           </nav>
         </div>
       ) : null}

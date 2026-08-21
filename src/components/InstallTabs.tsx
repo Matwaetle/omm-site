@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 type Platform = {
@@ -10,6 +11,8 @@ type Platform = {
   /** Verbatim from the omm README install section. */
   readonly command: string;
   readonly notes: readonly string[];
+  /** Long-form per-OS guides under /install. */
+  readonly guides: readonly { readonly label: string; readonly href: string }[];
 };
 
 const PLATFORMS: readonly Platform[] = [
@@ -21,7 +24,11 @@ const PLATFORMS: readonly Platform[] = [
       "curl -fsSL https://raw.githubusercontent.com/omm-hippo/omm/main/install.sh | sh",
     notes: [
       "Open a new shell afterward so your PATH picks up omm.",
-      "Requires Python 3.10+. The script bootstraps python3, git, and pipx when they are missing, via apt on Debian/Ubuntu or Homebrew on macOS.",
+      "Requires Python 3.10+. On Debian and Ubuntu the script installs python3, python3-venv, git and pipx for you through apt; on macOS and other distributions it checks for Python 3.10+ and git and stops if they are missing.",
+    ],
+    guides: [
+      { label: "macOS install guide", href: "/install/macos" },
+      { label: "Linux install guide", href: "/install/linux" },
     ],
   },
   {
@@ -35,6 +42,7 @@ const PLATFORMS: readonly Platform[] = [
       "Open a new PowerShell window afterward so your PATH picks up omm.",
       "Requires Python 3.10+. The script bootstraps Python and git via winget when they are missing.",
     ],
+    guides: [{ label: "Windows install guide", href: "/install/windows" }],
   },
 ];
 
@@ -165,6 +173,18 @@ export default function InstallTabs() {
                   </li>
                 ))}
               </ul>
+
+              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-left">
+                {platform.guides.map((guide) => (
+                  <Link
+                    key={guide.href}
+                    href={guide.href}
+                    className="text-small border-b border-line-1 pb-0.5 text-ink-1 transition-colors duration-[120ms] ease-[var(--ease-micro)] hover:border-accent hover:text-ink-0"
+                  >
+                    {guide.label} →
+                  </Link>
+                ))}
+              </div>
             </div>
           );
         })}

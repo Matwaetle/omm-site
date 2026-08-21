@@ -5,16 +5,24 @@ Source of truth: `D:\Desktop\오픈소스 개발자 프로젝트\omm-hippo\READM
 ## One-liner
 apt/brew-style package manager for local LLMs (GGUF). Installs models into a central hub, links them into seven local AI runners automatically, recommends models that fit your hardware.
 
-## The 7 runners + automation coverage (README verbatim)
+## The 7 runners + automation coverage
 | Runner | Automated on | Manual elsewhere |
 |---|---|---|
 | Ollama | macOS, Linux, Windows | — |
 | LM Studio | macOS, Linux, Windows (headless `lms` CLI) | — |
 | Jan | macOS (Homebrew), Windows (winget), Linux (Flatpak) | wherever that package manager isn't installed |
-| AnythingLLM | macOS (Homebrew), Windows (winget) | Linux |
+| AnythingLLM | macOS (Homebrew) | Windows, Linux |
 | Msty | macOS (Homebrew) | Windows, Linux |
-| KoboldCpp | macOS (Apple Silicon), Linux (x86_64), Windows | Intel Mac, other architectures |
+| KoboldCpp | macOS (Apple Silicon), Linux (x86_64), Windows (x86_64) | Intel Mac, other architectures |
 | text-generation-webui | macOS (any arch), Linux/Windows (x86_64) | ARM Linux/Windows |
+
+Source: `linker.has_automated_installer()` (`src/omm/linker.py:1893-1932`) plus the
+per-engine gates it reads — not the README table, which was stale for AnythingLLM
+(see "Known README/script divergences" below). Rendered by `Runners.tsx` and by the
+per-OS install guides, which now agree row for row. Two rows are narrower than the
+README's wording: AnythingLLM is `platform.system() == "Darwin"` only, and KoboldCpp
+on Windows is `("Windows", "AMD64")`, so ARM Windows is manual. The section's label
+reads `7 runners · 3 platforms`; neither number is a cell count, so it is unaffected.
 
 ## Real `omm scan --no-color` capture (2026-08-19, this dev machine)
 ```
@@ -64,3 +72,113 @@ For `omm install` / `omm list` output formats: read the actual omm source (`omm-
 
 ## Banned
 Any number not traceable to the README, a real capture, or build-time API. Any claim about user counts, stars ("10,000+ developers"), speed multipliers, or rankings.
+
+## Install guide pages (`/install`, `/install/windows|macos|linux`)
+
+Source of truth for these three pages is the omm product repo at
+`D:\Desktop\오픈소스 개발자 프로젝트\omm-hippo`. Content lives in
+`src/components/install/guides.ts`; every string below is quoted, not paraphrased.
+Line numbers are as of 2026-08-21 (`pyproject.toml` version `0.2.124`).
+
+### README sections used
+- **Install** — the two Git-source commands, the Windows TLS caveat verbatim,
+  the PyPI/pipx commands, "The distribution name is `omm-model`; the installed
+  command and Python import remain `omm`", the upgrade/remove commands, the
+  winget note ("built into Windows 10 2004+ and Windows 11 — on older Windows,
+  install Python 3.10+ and git manually first"), the Windows link strategy
+  (hard link → symlink under Developer Mode/Administrator → owned copy with a
+  free-space check; junctions do not apply because targets are files), and
+  "Requirements: Python 3.10+".
+- **Supported platforms** — Windows 10 22H2/11 baseline "because that matches
+  Ollama's native Windows requirements"; the three installer steps; the
+  `omm update` / beta-channel restriction for package-managed installs.
+- **Local AI runners** — the first-bare-`omm` setup wizard (hardware summary +
+  runner checklist, unautomated runners print a link), and "Every
+  currently-installed runner is also listed … marked as already installed".
+- **Storage location** — `OMM_HOME` defaults to `~/.omm`; the PowerShell and
+  `export` snippets verbatim; `OLLAMA_MODELS`; `OMM_LMSTUDIO_MODELS_DIR`.
+- **Completion and uninstall** — `omm --install-completion powershell|bash`
+  (zsh/fish), the two uninstall one-liners, `-Purge`/`--purge`, "Purge removes
+  only known omm-owned paths…", "shell profiles are never rewritten during
+  uninstall", and the pip/pipx uninstall commands.
+- **Scripting / benchmark** — Ollama-first HTTP detection on Windows.
+
+### Troubleshooting entries → the line that prints them
+Windows page:
+| Message | Source |
+|---|---|
+| `sh : The term 'sh' is not recognized…` | PowerShell built-in; the fix cites README Install (two distinct commands) |
+| `Windows detected. Run the native PowerShell installer instead:` | `install.sh:29-30` (guard at `install.sh:27-32`) |
+| `'irm' is not recognized as an internal or external command…` | cmd.exe built-in; fix cites README (command is PowerShell-only) |
+| `Could not create SSL/TLS secure channel` | `install.ps1:1-5` header comment; README Windows caveat |
+| `Python not found. Install Python 3.10+ first: …` | `install.ps1:217` |
+| `git not found. Install git first …` | `install.ps1:229`, `install.ps1:234` |
+| `git 2.34+ is required to verify SSH commit signatures (found …)` | `install.ps1:105` |
+| `Signature verification failed - refusing to install untrusted code.` | `install.ps1:553` |
+| `git clone failed.` | `install.ps1:529` |
+| `Refusing to replace unrelated pipx environment 'omm'…` | `install.ps1:506` |
+| `Refusing to replace an unverified omm-model pipx environment.` | `install.ps1:514` |
+| `Refusing unsafe OMM_HOME:` / `Refusing OMM_HOME that contains the current directory:` | `install.ps1:13`, `install.ps1:18` |
+| `omm : The term 'omm' is not recognized…` (PATH) | fix quoted from `install.ps1:671` |
+| `Refusing unrecognized custom OMM_HOME (missing .omm-managed):` | `uninstall.ps1:21` |
+
+macOS / Linux pages:
+| Message | Source |
+|---|---|
+| silent `curl -fsSL` failure | the `-f`/`-s` flags in the README command itself |
+| `Python 3.10+ not found: https://www.python.org/downloads/` | `install.sh:135` (apt bootstrap at `install.sh:122-125`) |
+| `git not found. Install git first (needed to fetch omm from GitHub).` | `install.sh:148` (apt bootstrap at `install.sh:141-145`) |
+| `python3-venv not found (needed by pipx), installing it via apt...` | `install.sh:152-155` |
+| `git 2.34+ is required to verify SSH commit signatures (found …)` | `install.sh:81` |
+| `Signature verification failed - refusing to install untrusted code.` | `install.sh:396` |
+| `Could not inspect existing pipx environments; refusing an unsafe migration.` | `install.sh:343` |
+| `Refusing to replace unrelated pipx environment 'omm'…` | `install.sh:351` |
+| `Refusing to replace an unverified omm-model pipx environment.` | `install.sh:361` |
+| `command not found: omm` (PATH) | fix quoted from `install.sh:508` |
+| `Refusing non-absolute OMM_HOME:` / `Refusing unsafe OMM_HOME:` | `install.sh:11`, `install.sh:14` |
+| `error: externally-managed-environment` (PEP 668) | `install.sh:327-336` — the script already retries with `--break-system-packages` |
+| `Homebrew not found - install manually from …` | `src/omm/linker.py:2104-2108` |
+| `flatpak not found - install manually from https://jan.ai/download` | `src/omm/linker.py:2116-2121` |
+| `Refusing unrecognized custom OMM_HOME (missing .omm-managed):` | `uninstall.sh:42` |
+
+### Per-OS runner coverage: the code, not the README table
+The guide pages list what `linker.has_automated_installer()` actually returns on
+each platform (`src/omm/linker.py:1893-1932`), because that function is the
+single source of truth for whether the setup wizard offers to install a runner:
+- `ollama`, `lmstudio`, `jan` — every platform (`linker.py:1910-1915`); Jan via
+  brew cask / winget `Jan.Jan` / flatpak `ai.jan.Jan` (`linker.py:2142-2152`),
+  and the wizard reports "<manager> not found" when that manager is absent
+  (`linker.py:2102-2125`).
+- `anythingllm` — `platform.system() == "Darwin"` only (`linker.py:1916-1923`).
+- `mstystudio` — `Darwin` only (`linker.py:1924-1927`, `2187-2191`).
+- `koboldcpp` — `_KOBOLDCPP_ASSET_BY_PLATFORM` = `(Darwin, arm64)`,
+  `(Linux, x86_64)`, `(Windows, AMD64)` (`linker.py:2202-2206`).
+- `textgenwebui` — Darwin any arch; Windows/Linux x86_64 only
+  (`linker.py:2285-2296`).
+
+### Known README/script divergences (script wins on the guide pages)
+1. **README says `install.sh` bootstraps via "apt on Debian/Ubuntu or Homebrew
+   on macOS".** `install.sh` has no Homebrew bootstrap at all — only `run_apt`
+   (`install.sh:105-155`); the sole `brew` mention is the PEP-668 comment at
+   `install.sh:332`. On macOS and on non-apt Linux the script checks and exits
+   with `Python 3.10+ not found` / `git not found`. `pipx` is bootstrapped with
+   `"$PY" -m pip install --user --quiet pipx`, falling back to
+   `--break-system-packages`, then `pipx ensurepath` (`install.sh:327-338`).
+   The landing page's Install tab footnote was corrected to match. README PR
+   #157 carries the same correction upstream.
+2. **README's runner table listed AnythingLLM as automated on "Windows
+   (winget)".** `linker.py:1916-1923` returns Darwin-only and documents why:
+   the `MintplexLabs.AnythingLLM` manifest was withdrawn from winget-pkgs on
+   2025-02-18 (microsoft/winget-pkgs#230632) and re-verified absent 2026-08-19.
+   Msty is likewise brew-cask-only (`linker.py:2187-2191`). Resolved: the
+   README is being corrected upstream, and the landing page's `Runners.tsx`
+   now renders the code-derived coverage above instead of the README table, so
+   the section and the three install guides agree. KoboldCpp's Windows chip
+   gained an `x86_64` note in the same pass, from
+   `_KOBOLDCPP_ASSET_BY_PLATFORM` (`linker.py:2202-2206`).
+
+### Numbers on these pages
+The only capture reproduced is the existing real `omm scan --no-color`
+Windows 11 run recorded above, shown on the Windows page with a caption saying
+it was taken under heavy load. The macOS and Linux pages have no capture, so
+they list the field names `omm scan` prints instead of inventing a table.
