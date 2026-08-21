@@ -297,7 +297,7 @@ const WINDOWS: Guide = {
     ],
     notes: [
       "Manual here means only that the wizard will not run the vendor's installer for you; it prints the download link, and once the app exists omm detects and links it like any other runner.",
-      "AnythingLLM has no winget package any more (the community manifest was withdrawn in 2025), and no winget package targets the current Msty Studio app — which is why neither is automated on Windows. The runner table in the product README still lists winget for AnythingLLM on Windows; the shipped code does not.",
+      "AnythingLLM has no winget package any more — the community manifest was withdrawn in 2025 — and no winget package targets the current Msty Studio app rather than its retired predecessor. That is why neither is automated on Windows.",
       "Every runner already installed is listed in the wizard too, marked as installed rather than hidden, so the checklist always reflects what omm actually detects.",
       "On Windows, Ollama is detected through its HTTP API first, so a freshly installed tray app is found even before this terminal receives the new PATH.",
     ],

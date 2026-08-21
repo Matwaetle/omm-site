@@ -5,16 +5,24 @@ Source of truth: `D:\Desktop\오픈소스 개발자 프로젝트\omm-hippo\READM
 ## One-liner
 apt/brew-style package manager for local LLMs (GGUF). Installs models into a central hub, links them into seven local AI runners automatically, recommends models that fit your hardware.
 
-## The 7 runners + automation coverage (README verbatim)
+## The 7 runners + automation coverage
 | Runner | Automated on | Manual elsewhere |
 |---|---|---|
 | Ollama | macOS, Linux, Windows | — |
 | LM Studio | macOS, Linux, Windows (headless `lms` CLI) | — |
 | Jan | macOS (Homebrew), Windows (winget), Linux (Flatpak) | wherever that package manager isn't installed |
-| AnythingLLM | macOS (Homebrew), Windows (winget) | Linux |
+| AnythingLLM | macOS (Homebrew) | Windows, Linux |
 | Msty | macOS (Homebrew) | Windows, Linux |
-| KoboldCpp | macOS (Apple Silicon), Linux (x86_64), Windows | Intel Mac, other architectures |
+| KoboldCpp | macOS (Apple Silicon), Linux (x86_64), Windows (x86_64) | Intel Mac, other architectures |
 | text-generation-webui | macOS (any arch), Linux/Windows (x86_64) | ARM Linux/Windows |
+
+Source: `linker.has_automated_installer()` (`src/omm/linker.py:1893-1932`) plus the
+per-engine gates it reads — not the README table, which was stale for AnythingLLM
+(see "Known README/script divergences" below). Rendered by `Runners.tsx` and by the
+per-OS install guides, which now agree row for row. Two rows are narrower than the
+README's wording: AnythingLLM is `platform.system() == "Darwin"` only, and KoboldCpp
+on Windows is `("Windows", "AMD64")`, so ARM Windows is manual. The section's label
+reads `7 runners · 3 platforms`; neither number is a cell count, so it is unaffected.
 
 ## Real `omm scan --no-color` capture (2026-08-19, this dev machine)
 ```
@@ -158,13 +166,16 @@ single source of truth for whether the setup wizard offers to install a runner:
    `--break-system-packages`, then `pipx ensurepath` (`install.sh:327-338`).
    The landing page's Install tab footnote was corrected to match. README PR
    #157 carries the same correction upstream.
-2. **README's runner table lists AnythingLLM as automated on "Windows
+2. **README's runner table listed AnythingLLM as automated on "Windows
    (winget)".** `linker.py:1916-1923` returns Darwin-only and documents why:
    the `MintplexLabs.AnythingLLM` manifest was withdrawn from winget-pkgs on
    2025-02-18 (microsoft/winget-pkgs#230632) and re-verified absent 2026-08-19.
-   Msty is likewise brew-cask-only (`linker.py:2187-2191`). The Windows guide
-   lists both as manual and says so explicitly. The landing page's Runners
-   section still renders the README table verbatim and was left unchanged.
+   Msty is likewise brew-cask-only (`linker.py:2187-2191`). Resolved: the
+   README is being corrected upstream, and the landing page's `Runners.tsx`
+   now renders the code-derived coverage above instead of the README table, so
+   the section and the three install guides agree. KoboldCpp's Windows chip
+   gained an `x86_64` note in the same pass, from
+   `_KOBOLDCPP_ASSET_BY_PLATFORM` (`linker.py:2202-2206`).
 
 ### Numbers on these pages
 The only capture reproduced is the existing real `omm scan --no-color`

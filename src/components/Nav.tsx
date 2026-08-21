@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 
-/** Real published version — omm-hippo/pyproject.toml `version = "0.2.106"`. */
-const VERSION = "v0.2.106";
+/** Real published version — omm-hippo origin/main `pyproject.toml`
+ *  `version = "0.2.148"`, which is also the v0.2.148 tag. */
+const VERSION = "v0.2.148";
 const REPO = "https://github.com/omm-hippo/omm";
 const WIKI = `${REPO}/wiki`;
 

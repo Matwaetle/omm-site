@@ -1,6 +1,7 @@
 /**
  * Runners — DIRECTION.md §4.5.
- * The README coverage table verbatim (design/FACTS.md §"The 7 runners"),
+ * The coverage table from linker.has_automated_installer()
+ * (design/FACTS.md §"The 7 runners"),
  * rendered as full-bleed hairline rows rather than a boxed table: runner names
  * in Archivo so the one sans column anchors the mono grid, platforms as small
  * mono chips, `—` in --ink-3. Not a logo grid — the repo ships no logo assets,
@@ -42,11 +43,8 @@ const ROWS: RunnerRow[] = [
   },
   {
     runner: "AnythingLLM",
-    automated: [
-      { os: "macOS", note: "Homebrew" },
-      { os: "Windows", note: "winget" },
-    ],
-    manual: "Linux",
+    automated: [{ os: "macOS", note: "Homebrew" }],
+    manual: "Windows, Linux",
   },
   {
     runner: "Msty",
@@ -58,7 +56,7 @@ const ROWS: RunnerRow[] = [
     automated: [
       { os: "macOS", note: "Apple Silicon" },
       { os: "Linux", note: "x86_64" },
-      { os: "Windows" },
+      { os: "Windows", note: "x86_64" },
     ],
     manual: "Intel Mac, other architectures",
   },
