@@ -62,7 +62,7 @@ export async function generateMetadata({
   const dictionary = getDictionary(locale);
 
   return {
-    metadataBase: new URL("https://omm-site-sage.vercel.app"),
+    metadataBase: new URL("https://www.omm.run"),
     title: dictionary.meta.title,
     description: dictionary.meta.description,
     applicationName: "omm",
