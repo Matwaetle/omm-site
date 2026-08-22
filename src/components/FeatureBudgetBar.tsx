@@ -13,6 +13,9 @@
  * scan where a model actually fits; total/CPU/OS are the captured values.
  */
 
+import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionaries";
+
 const TOTAL_GB = 15.5;
 const IN_USE_GB = 5.7; // 15.5 total - 9.8 available
 const RESERVE_GB = 1.55; // max(1.0, 10% of 15.5)
@@ -21,36 +24,19 @@ const MODEL_GB = 4.37; // mistral-7b-instruct-v0.2.Q4_K_M.gguf
 
 const pct = (gb: number) => `${((gb / TOTAL_GB) * 100).toFixed(3)}%`;
 
+/** Geometry and readouts; the labels come from the dictionary. */
 const SEGMENTS = [
-  {
-    key: "in-use",
-    gb: IN_USE_GB,
-    read: "5.7 GB",
-    label: "In use by other apps",
-    fill: "bg-bg-3",
-  },
-  {
-    key: "reserve",
-    gb: RESERVE_GB,
-    read: "1.6 GB+",
-    label: "Reserved for apps/OS",
-    fill: "bg-bg-2",
-  },
-  {
-    key: "budget",
-    gb: BUDGET_GB,
-    read: "8.2 GB",
-    label: "Safe model budget — the smaller of the two",
-    fill: "bg-line-1",
-  },
-];
+  { key: "inUse", gb: IN_USE_GB, read: "5.7 GB", fill: "bg-bg-3" },
+  { key: "reserve", gb: RESERVE_GB, read: "1.6 GB+", fill: "bg-bg-2" },
+  { key: "budget", gb: BUDGET_GB, read: "8.2 GB", fill: "bg-line-1" },
+] as const;
 
-export default function FeatureBudgetBar() {
+export default function FeatureBudgetBar({ locale }: { locale: Locale }) {
+  const t = getDictionary(locale).featureVisuals.budget;
+
   return (
     <figure className="rounded-lg border border-line-0 bg-bg-1 p-6">
-      <figcaption className="text-label">
-        RAM 15.5 GB · Intel Core Ultra 7 155H · Windows 11
-      </figcaption>
+      <figcaption className="text-label">{t.caption}</figcaption>
 
       {/* model-footprint tick, above the bar so the 1px rule stays readable */}
       <div className="relative mt-6 h-6">
@@ -62,7 +48,7 @@ export default function FeatureBudgetBar() {
           className="absolute bottom-3 -translate-x-full pr-2 text-label text-accent"
           style={{ left: pct(IN_USE_GB + RESERVE_GB + MODEL_GB) }}
         >
-          4.37 GB model
+          {t.model}
         </div>
       </div>
 
@@ -82,12 +68,12 @@ export default function FeatureBudgetBar() {
             key={segment.key}
             className="flex justify-between border-t border-line-0 py-2"
           >
-            <dt className="text-ink-2">{segment.label}</dt>
+            <dt className="text-ink-2">{t[segment.key]}</dt>
             <dd className="text-ink-0">{segment.read}</dd>
           </div>
         ))}
         <div className="flex justify-between border-t border-line-0 py-2">
-          <dt className="text-ink-3">Install cap — 80% of total RAM</dt>
+          <dt className="text-ink-3">{t.cap}</dt>
           <dd className="text-ink-3">12.4 GB</dd>
         </div>
       </dl>

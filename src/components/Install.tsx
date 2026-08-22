@@ -1,8 +1,18 @@
 import InstallTabs from "@/components/InstallTabs";
-import { INSTALLER_STEPS } from "@/components/install/installer-steps";
 import Reveal from "@/components/Reveal";
+import { getGuideLinks } from "@/components/install/guides";
+import { fill, getDictionary } from "@/i18n/dictionaries";
+import { localeHref, type Locale } from "@/i18n/config";
 
-export default function Install() {
+export default function Install({ locale }: { locale: Locale }) {
+  const dictionary = getDictionary(locale);
+  const t = dictionary.install;
+  const guides = getGuideLinks(locale).map((link) => ({
+    href: localeHref(link.href, locale),
+    label: fill(t.tabs.guideLink, { os: link.os }),
+    slug: link.slug,
+  }));
+
   return (
     <section
       id="install"
@@ -13,32 +23,25 @@ export default function Install() {
       <div className="relative mx-auto w-full max-w-page px-5 md:px-8">
         <div className="mx-auto max-w-[880px]">
           <Reveal className="text-center">
-            <p className="text-label">Install</p>
-            <h2 className="text-h2 mt-4">
-              One line. It verifies the signed commit before it installs
-              anything.
-            </h2>
-            <p className="text-lede mx-auto mt-6 max-w-[640px]">
-              Requires Python 3.10+ on Windows 10 22H2 or later, macOS, or
-              Linux. The script bootstraps whatever is missing, then installs
-              omm as an isolated pipx CLI.
-            </p>
+            <p className="text-label">{t.label}</p>
+            <h2 className="text-h2 mt-4">{t.heading}</h2>
+            <p className="text-lede mx-auto mt-6 max-w-[640px]">{t.lede}</p>
           </Reveal>
 
           <div className="mt-12">
-            <InstallTabs />
+            <InstallTabs t={t.tabs} ui={dictionary.ui} guides={guides} />
           </div>
 
           <div className="mt-16 border-t border-line-0">
-            <p className="text-label pt-8">What the installer does</p>
+            <p className="text-label pt-8">{t.whatItDoes}</p>
             <ol className="mt-6 flex flex-col">
-              {INSTALLER_STEPS.map((item) => (
+              {t.steps.map((item, index) => (
                 <li
-                  key={item.step}
+                  key={item.title}
                   className="grid grid-cols-[auto_minmax(0,1fr)] gap-4 border-b border-line-0 py-4 first:border-t"
                 >
                   <span className="text-terminal text-ink-3" aria-hidden>
-                    {item.step}
+                    {String(index + 1).padStart(2, "0")}
                   </span>
                   <span className="text-terminal text-left">
                     <span className="text-ink-0">{item.title}</span>

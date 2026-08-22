@@ -70,6 +70,25 @@ For `omm install` / `omm list` output formats: read the actual omm source (`omm-
 - Windows link strategy: hard link first, then symlink (Dev Mode/Admin), then owned copy with free-space check.
 - Uninstall preserves models/settings; `--purge` removes hub too.
 
+## Korean locale (`/ko`)
+
+The Korean pages are a **translation of the English pages at `975faf4`**, nothing
+more. No claim, number, command, coverage row or error message exists in Korean
+that does not exist in English at that commit; this whole document therefore
+governs `/ko` exactly as it governs `/`. Adding a fact to Korean without adding
+it to English (and to this file) is the same violation as inventing one.
+
+What is deliberately **not** translated, because the reader will see it in
+English on their own screen: every command and flag, environment variables and
+file paths, the verbatim installer/uninstaller/shell messages (the `see` field),
+the `source` citations, `omm scan` field names, product and runner names, the
+captured terminal output, and the mono coverage chips
+(`macOS` / `Linux` / `Windows`, `winget`, `Homebrew`, `x86_64`, …).
+
+One exception: a `see` entry that describes an absence rather than quoting a
+printed message ("Nothing at all. The command returns immediately…") is
+translated, because there is no English string on screen for it to match.
+
 ## Banned
 Any number not traceable to the README, a real capture, or build-time API. Any claim about user counts, stars ("10,000+ developers"), speed multipliers, or rankings.
 
@@ -77,7 +96,11 @@ Any number not traceable to the README, a real capture, or build-time API. Any c
 
 Source of truth for these three pages is the omm product repo at
 `D:\Desktop\오픈소스 개발자 프로젝트\omm-hippo`. Content lives in
-`src/components/install/guides.ts`; every string below is quoted, not paraphrased.
+`src/i18n/guides/` — `base.ts` for everything language-independent (commands,
+prompt samples, captured output, the verbatim messages and their file:line),
+`en.ts` / `ko.ts` for prose — and is assembled by
+`src/components/install/guides.ts`; every string below is quoted, not
+paraphrased.
 Line numbers are as of 2026-08-21 (`pyproject.toml` version `0.2.124`).
 
 ### README revision this content tracks

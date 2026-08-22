@@ -224,12 +224,11 @@ const subscribeReducedMotion = (onChange: () => void) => {
   return () => query.removeEventListener("change", onChange);
 };
 
-const A11Y_LABEL =
-  "Terminal recording. omm scan reports the machine and three installed runners; " +
-  "omm install downloads a 4.37 GB quantised Mistral 7B and links it; " +
-  "omm list shows the single file linked into Ollama, LM Studio and Jan.";
+/** `label` and `footnote` are the only prose in this component; everything
+ *  else is reproduced omm output and reads the same in every language. */
+type Props = { readonly label: string; readonly footnote: string };
 
-export default function Terminal() {
+export default function Terminal({ label, footnote }: Props) {
   const [rawStep, setStep] = useState(0);
   const [rawTick, setTick] = useState(0);
   const [run, setRun] = useState(0);
@@ -313,7 +312,7 @@ export default function Terminal() {
     <div>
       <div
         role="img"
-        aria-label={A11Y_LABEL}
+        aria-label={label}
         className="relative overflow-hidden rounded-lg border border-line-1 bg-bg-1"
       >
         <style href="omm-terminal-cursor" precedence="default">
@@ -353,9 +352,7 @@ export default function Terminal() {
       {/* The download line prints base-1000 GB and `omm list` prints
           bytes/1024^3 under a "GB" label (cli.py:4369-4375) — one real file,
           two real renderings. Named here rather than left to look invented. */}
-      <p className="text-small mt-3 text-ink-3">
-        4.37 GB decimal = 4.07 GiB — omm list labels GiB as GB; bug filed upstream.
-      </p>
+      <p className="text-small mt-3 text-ink-3">{footnote}</p>
     </div>
   );
 }

@@ -28,7 +28,8 @@ e.g. `bg-bg-1`, `text-ink-2`, `border-line-0`, `text-accent`, `bg-accent text-ac
 `text-display` 76/70/42px · `text-h2` 40→30 · `text-h3` 22→20 · `text-lede` 19→17 · `text-small` 14 · `text-label` 11 mono UPPER +0.14em · `text-terminal` 13.5 mono · `text-table` 13 mono.
 Body (16/1.62 Archivo, `ink-1`) is the `<body>` default — no class needed.
 Mobile sizes fire automatically at `max-width: 640px` (display also steps down at 1024px). Each class carries a default color (`ink-0`/`ink-1`/`ink-2`/`ink-3`); override with any `text-ink-*` utility.
-Families: `font-sans` (Archivo) · `font-mono` (JetBrains Mono). Nothing else exists.
+Families: `font-sans` (Archivo) · `font-mono` (JetBrains Mono). Nothing else exists — Noto Sans KR sits last in both stacks purely as the Hangul fallback and is never named directly.
+Korean pages get automatic `:lang(ko)` tracking/leading corrections and `word-break: keep-all` on the same classes; never hand-roll a Korean-only size or spacing in a component.
 
 ## Spacing — 4px base, allowed steps only
 

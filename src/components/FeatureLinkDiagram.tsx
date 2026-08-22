@@ -9,6 +9,9 @@
  * `<app data>` is ~/.config/<Product> on Linux, which is the variant shown.
  */
 
+import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionaries";
+
 type Runner = { name: string; dir: string; linked: boolean };
 
 const RUNNERS: Runner[] = [
@@ -59,13 +62,15 @@ function connector(index: number) {
   return `M ${HUB_RIGHT} ${HUB_Y} H ${lane} V ${y} H ${LABEL_X - 8}`;
 }
 
-export default function FeatureLinkDiagram() {
+export default function FeatureLinkDiagram({ locale }: { locale: Locale }) {
+  const t = getDictionary(locale).featureVisuals.link;
+
   return (
     <figure className="overflow-x-auto rounded-lg border border-line-0 bg-bg-1 p-6">
       <svg
         viewBox="0 0 800 268"
         role="img"
-        aria-label="One GGUF in the omm hub, linked into three installed runner directories; four more runner directories are not installed."
+        aria-label={t.alt}
         className="h-auto w-full min-w-[40rem]"
       >
         {/* hub */}
@@ -169,7 +174,7 @@ export default function FeatureLinkDiagram() {
           fontSize="11"
           className="fill-ink-2 font-mono"
         >
-          linked
+          {t.linked}
         </text>
         <line
           x1={LABEL_X + 96}
@@ -186,7 +191,7 @@ export default function FeatureLinkDiagram() {
           fontSize="11"
           className="fill-ink-3 font-mono"
         >
-          not installed — skipped
+          {t.skipped}
         </text>
       </svg>
     </figure>

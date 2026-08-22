@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { fill, type Dictionary } from "@/i18n/dictionaries";
+
 const COPIED_MS = 1200;
 
 type Props = {
@@ -16,6 +18,8 @@ type Props = {
    * geometry, so the two never read as different components.
    */
   readonly tone?: "primary" | "secondary";
+  /** `copy` / `copied` / the copy button's accessible name. */
+  readonly ui: Dictionary["ui"];
 };
 
 /**
@@ -28,6 +32,7 @@ export default function CommandBlock({
   command,
   label,
   tone = "primary",
+  ui,
 }: Props) {
   const secondary = tone === "secondary";
   const [copied, setCopied] = useState(false);
@@ -69,10 +74,10 @@ export default function CommandBlock({
       <button
         type="button"
         onClick={() => void copy()}
-        aria-label={`Copy: ${label}`}
+        aria-label={fill(ui.copyAria, { what: label })}
         className="text-label shrink-0 rounded-md border border-line-1 px-3 py-2 text-ink-2 transition-colors duration-[120ms] ease-[var(--ease-micro)] hover:bg-bg-3 hover:text-ink-0"
       >
-        <span aria-live="polite">{copied ? "copied" : "copy"}</span>
+        <span aria-live="polite">{copied ? ui.copied : ui.copy}</span>
       </button>
     </div>
   );

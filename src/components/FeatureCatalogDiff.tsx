@@ -12,6 +12,10 @@
  * and no public key ships in the repo, so printing digits would invent a number.
  */
 
+import RichText from "@/components/RichText";
+import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionaries";
+
 const ARTIFACT_SHA256 =
   "a07e9a5993b711ad86460e6e7f17d7c26755b2c670d837804f0d466b3e4211fa";
 
@@ -56,7 +60,9 @@ function gutterClass(gutter: Line["gutter"]) {
   return "text-ink-3";
 }
 
-export default function FeatureCatalogDiff() {
+export default function FeatureCatalogDiff({ locale }: { locale: Locale }) {
+  const t = getDictionary(locale).featureVisuals.catalog;
+
   return (
     <figure className="overflow-hidden rounded-lg border border-line-0 bg-bg-1">
       <div className="overflow-x-auto p-6">
@@ -85,11 +91,10 @@ export default function FeatureCatalogDiff() {
         </pre>
       </div>
       <figcaption className="border-t border-line-0 px-6 py-3 text-small text-ink-3">
-        A mismatched hash aborts with{" "}
-        <code className="rounded-sm bg-bg-2 px-1 font-mono text-ink-2">
-          catalog artifact hash does not match manifest
-        </code>{" "}
-        and the file on disk is left alone.
+        <RichText
+          segments={t.footnote}
+          codeClassName="rounded-sm bg-bg-2 px-1 font-mono text-ink-2"
+        />
       </figcaption>
     </figure>
   );

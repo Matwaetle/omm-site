@@ -47,6 +47,13 @@
   --r-md: 5px; /* buttons, inputs, tabs */
   --r-lg: 8px; /* terminal window, panels */
 
+  /* font stacks — Archivo/JetBrains Mono first, Noto Sans KR only as the
+     Hangul fallback (Archivo and JetBrains Mono ship no Hangul). Latin,
+     digits and the box-drawing block never reach it, so English pages and the
+     terminal captures render exactly as before. DIRECTION.md §3. */
+  --stack-sans: var(--font-archivo), var(--font-noto-kr), system-ui, sans-serif;
+  --stack-mono: var(--font-jetbrains), var(--font-noto-kr), ui-monospace, monospace;
+
   /* motion */
   --ease-entrance: cubic-bezier(0.2, 0, 0, 1);
   --ease-micro: cubic-bezier(0.4, 0, 0.2, 1);
@@ -96,8 +103,8 @@
   --radius-md: var(--r-md);
   --radius-lg: var(--r-lg);
 
-  --font-sans: var(--font-archivo), system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-sans: var(--stack-sans);
+  --font-mono: var(--stack-mono);
 
   --container-page: 1280px;
 
@@ -117,7 +124,7 @@
   body {
     background-color: var(--bg-0);
     color: var(--ink-1);
-    font-family: var(--font-archivo), system-ui, sans-serif;
+    font-family: var(--stack-sans);
     font-size: 16px;
     line-height: 1.62;
     font-weight: 400;
@@ -129,6 +136,25 @@
   ::selection {
     background-color: var(--accent-wash);
     color: var(--ink-0);
+  }
+
+  /* Korean has no spaces inside a word, so the default break rules split
+     tokens mid-word. `keep-all` stops that; `anywhere` keeps a long Latin
+     token (a path, a URL) from pushing a narrow column past the viewport.
+     Runs of literal output opt back out — they scroll instead of wrapping. */
+  :lang(ko) {
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  pre:lang(ko),
+  code:lang(ko) {
+    word-break: normal;
+    overflow-wrap: normal;
+  }
+
+  body:lang(ko) {
+    line-height: 1.7;
   }
 
   /* Focus ring: accent by default; .focus-ring-neutral flips it to the
@@ -186,7 +212,7 @@
 
 @layer components {
   .text-display {
-    font-family: var(--font-archivo), system-ui, sans-serif;
+    font-family: var(--stack-sans);
     font-size: 76px;
     line-height: 0.94;
     letter-spacing: -0.035em;
@@ -196,7 +222,7 @@
   }
 
   .text-h2 {
-    font-family: var(--font-archivo), system-ui, sans-serif;
+    font-family: var(--stack-sans);
     font-size: 40px;
     line-height: 1.06;
     letter-spacing: -0.022em;
@@ -205,7 +231,7 @@
   }
 
   .text-h3 {
-    font-family: var(--font-archivo), system-ui, sans-serif;
+    font-family: var(--stack-sans);
     font-size: 22px;
     line-height: 1.25;
     letter-spacing: -0.012em;
@@ -214,7 +240,7 @@
   }
 
   .text-lede {
-    font-family: var(--font-archivo), system-ui, sans-serif;
+    font-family: var(--stack-sans);
     font-size: 19px;
     line-height: 1.55;
     letter-spacing: -0.005em;
@@ -223,7 +249,7 @@
   }
 
   .text-small {
-    font-family: var(--font-archivo), system-ui, sans-serif;
+    font-family: var(--stack-sans);
     font-size: 14px;
     line-height: 1.5;
     font-weight: 400;
@@ -231,7 +257,7 @@
   }
 
   .text-label {
-    font-family: var(--font-jetbrains), ui-monospace, monospace;
+    font-family: var(--stack-mono);
     font-size: 11px;
     line-height: 1;
     letter-spacing: 0.14em;
@@ -241,17 +267,49 @@
   }
 
   .text-terminal {
-    font-family: var(--font-jetbrains), ui-monospace, monospace;
+    font-family: var(--stack-mono);
     font-size: 13.5px;
     line-height: 1.62;
     font-weight: 400;
   }
 
   .text-table {
-    font-family: var(--font-jetbrains), ui-monospace, monospace;
+    font-family: var(--stack-mono);
     font-size: 13px;
     line-height: 1.45;
     font-weight: 400;
+  }
+
+  /* Korean overrides. The Latin scale's negative tracking is drawn for
+     Archivo's closed apertures; applied to Hangul the syllable blocks collide,
+     and the tight display leading leaves no room for the taller glyph box.
+     Sizes are unchanged, so the layout keeps the same measure. */
+  .text-display:lang(ko) {
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+  }
+
+  .text-h2:lang(ko) {
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+
+  .text-h3:lang(ko) {
+    line-height: 1.4;
+    letter-spacing: 0;
+  }
+
+  .text-lede:lang(ko) {
+    line-height: 1.65;
+    letter-spacing: 0;
+  }
+
+  .text-small:lang(ko) {
+    line-height: 1.6;
+  }
+
+  .text-label:lang(ko) {
+    letter-spacing: 0.06em;
   }
 
   /* intermediate step so the display head does not overflow at tablet width */

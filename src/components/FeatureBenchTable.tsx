@@ -10,6 +10,9 @@
  * carry the table instead.
  */
 
+import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionaries";
+
 type Item = {
   id: string;
   locale: "en" | "ko";
@@ -85,14 +88,14 @@ const ITEMS: Item[] = [
   },
 ];
 
-export default function FeatureBenchTable() {
+export default function FeatureBenchTable({ locale }: { locale: Locale }) {
+  const t = getDictionary(locale).featureVisuals.bench;
+
   return (
     <figure className="overflow-hidden rounded-lg border border-line-0 bg-bg-1">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[36rem] border-collapse text-table">
-          <caption className="sr-only">
-            localfit-gsm8k-bilingual-smoke, pack version 1.1.0 — all eight items
-          </caption>
+          <caption className="sr-only">{t.caption}</caption>
           <thead>
             <tr className="border-b border-line-1 bg-bg-2 text-ink-2">
               <th scope="col" className="px-4 py-2 text-left font-normal">
@@ -133,8 +136,7 @@ export default function FeatureBenchTable() {
         </table>
       </div>
       <figcaption className="border-t border-line-0 px-4 py-3 text-small text-ink-3">
-        localfit-gsm8k-bilingual-smoke 1.1.0 · temperature 0, seed 0, Ollama
-        only. Eight items. Not a leaderboard.
+        {t.footnote}
       </figcaption>
     </figure>
   );

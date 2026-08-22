@@ -1,23 +1,31 @@
 import Link from "next/link";
 
 import CommandBlock from "@/components/install/CommandBlock";
-import { GUIDE_LINKS, type Command, type Guide } from "@/components/install/guides";
-import { INSTALLER_STEPS } from "@/components/install/installer-steps";
+import {
+  getGuideLinks,
+  type Command,
+  type Guide,
+} from "@/components/install/guides";
 import Reveal from "@/components/Reveal";
+import { localeHref, type Locale } from "@/i18n/config";
+import { fill, getDictionary, type Dictionary } from "@/i18n/dictionaries";
 
 const REPO = "https://github.com/omm-hippo/omm";
 const WIKI = `${REPO}/wiki`;
 
-const SECTIONS = [
-  { id: "which-app", n: "01", title: "Which app to open" },
-  { id: "before", n: "02", title: "Before you start" },
-  { id: "install", n: "03", title: "Install" },
-  { id: "verification", n: "04", title: "What the installer does" },
-  { id: "after", n: "05", title: "After install" },
-  { id: "runners", n: "06", title: "Runners on this system" },
-  { id: "keeping", n: "07", title: "Storage, completion, uninstall" },
-  { id: "trouble", n: "08", title: "If something goes wrong" },
+/** Anchor ids are part of the URL, so they stay English in every locale. */
+const SECTION_IDS = [
+  "which-app",
+  "before",
+  "install",
+  "verification",
+  "after",
+  "runners",
+  "keeping",
+  "trouble",
 ] as const;
+
+const SECTION_NUMBERS = ["01", "02", "03", "04", "05", "06", "07", "08"] as const;
 
 function SectionHead({
   n,
@@ -95,10 +103,12 @@ function CommandGroup({
   items,
   label,
   tone,
+  ui,
 }: {
   items: readonly Command[];
   label: string;
   tone?: "primary" | "secondary";
+  ui: Dictionary["ui"];
 }) {
   return (
     <div className="mt-6 flex flex-col gap-4">
@@ -112,6 +122,7 @@ function CommandGroup({
             command={item.command}
             label={`${label} — ${item.command}`}
             tone={tone}
+            ui={ui}
           />
         </div>
       ))}
@@ -119,8 +130,25 @@ function CommandGroup({
   );
 }
 
-export default function GuidePage({ guide }: { guide: Guide }) {
-  const others = GUIDE_LINKS.filter((link) => link.slug !== guide.slug);
+export default function GuidePage({
+  guide,
+  locale,
+}: {
+  guide: Guide;
+  locale: Locale;
+}) {
+  const dictionary = getDictionary(locale);
+  const t = dictionary.guide;
+  const ui = dictionary.ui;
+  const others = getGuideLinks(locale).filter(
+    (link) => link.slug !== guide.slug,
+  );
+
+  const sections = SECTION_IDS.map((id, index) => ({
+    id,
+    n: SECTION_NUMBERS[index],
+    title: t.sections[index],
+  }));
 
   return (
     <main>
@@ -129,12 +157,15 @@ export default function GuidePage({ guide }: { guide: Guide }) {
       <section className="relative border-b border-line-0 bg-bg-0 pt-24 pb-16">
         <div className="grid-bg pointer-events-none absolute inset-0" aria-hidden />
         <div className="relative mx-auto w-full max-w-page px-5 md:px-8">
-          <nav aria-label="Breadcrumb" className="text-label">
-            <Link href="/" className="hover:text-ink-1">
+          <nav aria-label={t.breadcrumbAria} className="text-label">
+            <Link href={localeHref("/", locale)} className="hover:text-ink-1">
               omm
             </Link>
             <span className="text-ink-3"> / </span>
-            <Link href="/install" className="hover:text-ink-1">
+            <Link
+              href={localeHref("/install", locale)}
+              className="hover:text-ink-1"
+            >
               install
             </Link>
             <span className="text-ink-3"> / </span>
@@ -149,7 +180,7 @@ export default function GuidePage({ guide }: { guide: Guide }) {
           </div>
 
           <ul className="mt-12 flex flex-wrap gap-x-6 gap-y-2">
-            {SECTIONS.map((section) => (
+            {sections.map((section) => (
               <li key={section.id}>
                 <a
                   href={`#${section.id}`}
@@ -168,13 +199,13 @@ export default function GuidePage({ guide }: { guide: Guide }) {
           {/* Left rail: an index that stays put while the reader scrolls. It is
               also what pushes the body copy off the container's midpoint. */}
           <nav
-            aria-label="On this page"
+            aria-label={t.onThisPage}
             className="hidden lg:col-span-3 lg:block"
           >
             <div className="sticky top-14 py-12">
-              <p className="text-label">On this page</p>
+              <p className="text-label">{t.onThisPage}</p>
               <ul className="mt-4 flex flex-col">
-                {SECTIONS.map((section) => (
+                {sections.map((section) => (
                   <li key={section.id}>
                     <a
                       href={`#${section.id}`}
@@ -225,7 +256,7 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                       <span
                         className={`text-small ${sample.ok ? "text-ink-1" : "text-ink-2"}`}
                       >
-                        {sample.ok ? "" : "not this one — "}
+                        {sample.ok ? "" : t.notThisOne}
                         {sample.program}
                       </span>
                     </li>
@@ -246,7 +277,7 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                   n="02"
                   os={guide.os}
                   id="before"
-                  title="Before you start"
+                  title={t.sections[1]}
                   body={guide.before.body}
                 />
                 <Rows>
@@ -280,14 +311,15 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                   n="03"
                   os={guide.os}
                   id="install"
-                  title="Install"
+                  title={t.sections[2]}
                   body={guide.install.body}
                 />
                 <div className="mt-6">
                   <CommandBlock
                     prompt={guide.install.command.prompt}
                     command={guide.install.command.command}
-                    label={`the ${guide.os} install command`}
+                    label={fill(t.installCommandAria, { os: guide.os })}
+                    ui={ui}
                   />
                 </div>
                 <NoteList notes={guide.install.notes} />
@@ -300,6 +332,7 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                       items={alt.commands}
                       label={`${guide.os} — ${alt.heading}`}
                       tone="secondary"
+                      ui={ui}
                     />
                     <NoteList notes={alt.notes} />
                   </div>
@@ -318,17 +351,17 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                   n="04"
                   os={guide.os}
                   id="verification"
-                  title="What the installer does"
-                  body="The one-line installer is not a plain download-and-run. It does three things in order, and it stops at the second one if the code it fetched is not the code omm signed."
+                  title={t.sections[3]}
+                  body={t.verificationBody}
                 />
                 <ol className="mt-6 flex flex-col">
-                  {INSTALLER_STEPS.map((item) => (
+                  {dictionary.install.steps.map((item, index) => (
                     <li
-                      key={item.step}
+                      key={item.title}
                       className="grid grid-cols-[auto_minmax(0,1fr)] gap-4 border-b border-line-0 py-4 first:border-t"
                     >
                       <span className="text-terminal text-ink-3" aria-hidden>
-                        {item.step}
+                        {SECTION_NUMBERS[index]}
                       </span>
                       <span className="text-terminal">
                         <span className="text-ink-0">{item.title}</span>
@@ -338,8 +371,7 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                   ))}
                 </ol>
                 <p className="text-small mt-4 max-w-[68ch]">
-                  Do not replace this with an unverified git clone plus pipx
-                  install if commit authenticity matters to you.
+                  {t.verificationNote}
                 </p>
               </Reveal>
             </section>
@@ -355,7 +387,7 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                   n="05"
                   os={guide.os}
                   id="after"
-                  title="After install"
+                  title={t.sections[4]}
                   body={guide.after.body}
                 />
                 <ol className="mt-6 flex flex-col gap-8">
@@ -376,6 +408,7 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                                 prompt={step.command.prompt}
                                 command={step.command.command}
                                 label={step.command.command}
+                                ui={ui}
                               />
                             </div>
                           ) : null}
@@ -405,7 +438,7 @@ export default function GuidePage({ guide }: { guide: Guide }) {
 
                 {guide.after.scanFields ? (
                   <div className="mt-8">
-                    <p className="text-label">omm scan reports</p>
+                    <p className="text-label">{t.scanReports}</p>
                     <ul className="mt-4 flex flex-col border-t border-line-0">
                       {guide.after.scanFields.map((field) => (
                         <li
@@ -432,7 +465,7 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                   n="06"
                   os={guide.os}
                   id="runners"
-                  title={`Runners on ${guide.os}`}
+                  title={fill(t.runnersHeading, { os: guide.os })}
                   body={guide.runners.body}
                 />
                 <ul className="mt-6 flex flex-col border-t border-line-0">
@@ -454,7 +487,7 @@ export default function GuidePage({ guide }: { guide: Guide }) {
 
                 {guide.runners.linking ? (
                   <div className="mt-10">
-                    <h3 className="text-h3">How omm exposes a model here</h3>
+                    <h3 className="text-h3">{t.linkingHeading}</h3>
                     <Rows>
                       {guide.runners.linking.map((line) => (
                         <Row key={line}>
@@ -478,20 +511,21 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                   n="07"
                   os={guide.os}
                   id="keeping"
-                  title="Storage, completion, uninstall"
+                  title={t.sections[6]}
                 />
 
-                <h3 className="text-h3 mt-8">Where models are stored</h3>
+                <h3 className="text-h3 mt-8">{t.storageHeading}</h3>
                 <p className="text-small mt-3 max-w-[68ch]">
                   {guide.keeping.storageBody}
                 </p>
                 <CommandGroup
                   items={guide.keeping.storageCommands}
-                  label="set OMM_HOME"
+                  label={t.storageAria}
+                  ui={ui}
                 />
                 <NoteList notes={guide.keeping.storageNotes} />
 
-                <h3 className="text-h3 mt-12">Shell completion</h3>
+                <h3 className="text-h3 mt-12">{t.completionHeading}</h3>
                 <p className="text-small mt-3 max-w-[68ch]">
                   {guide.keeping.completionBody}
                 </p>
@@ -499,11 +533,12 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                   <CommandBlock
                     prompt={guide.keeping.completionCommand.prompt}
                     command={guide.keeping.completionCommand.command}
-                    label="install shell completion"
+                    label={t.completionAria}
+                    ui={ui}
                   />
                 </div>
 
-                <h3 className="text-h3 mt-12">Uninstall</h3>
+                <h3 className="text-h3 mt-12">{t.uninstallHeading}</h3>
                 <p className="text-small mt-3 max-w-[68ch]">
                   {guide.keeping.uninstallBody}
                 </p>
@@ -511,7 +546,8 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                   <CommandBlock
                     prompt={guide.keeping.uninstallCommand.prompt}
                     command={guide.keeping.uninstallCommand.command}
-                    label="uninstall omm"
+                    label={t.uninstallAria}
+                    ui={ui}
                   />
                 </div>
                 <NoteList notes={guide.keeping.uninstallNotes} />
@@ -529,8 +565,8 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                   n="08"
                   os={guide.os}
                   id="trouble"
-                  title="If something goes wrong"
-                  body="Every message below is one the installer, the uninstaller or the shell actually prints. Find yours, read why it happened, then do the last line."
+                  title={t.sections[7]}
+                  body={t.troubleBody}
                 />
                 <ol className="mt-6 flex flex-col border-t border-line-0">
                   {guide.trouble.map((entry) => (
@@ -540,19 +576,19 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                       </pre>
                       <dl className="mt-4 flex flex-col gap-3">
                         <div className="grid grid-cols-1 gap-1 sm:grid-cols-[minmax(0,12ch)_minmax(0,1fr)] sm:gap-4">
-                          <dt className="text-label">why</dt>
+                          <dt className="text-label">{t.troubleWhy}</dt>
                           <dd className="text-small max-w-[68ch]">
                             {entry.why}
                           </dd>
                         </div>
                         <div className="grid grid-cols-1 gap-1 sm:grid-cols-[minmax(0,12ch)_minmax(0,1fr)] sm:gap-4">
-                          <dt className="text-label">what to do</dt>
+                          <dt className="text-label">{t.troubleFix}</dt>
                           <dd className="text-small max-w-[68ch] text-ink-1">
                             {entry.fix}
                           </dd>
                         </div>
                         <div className="grid grid-cols-1 gap-1 sm:grid-cols-[minmax(0,12ch)_minmax(0,1fr)] sm:gap-4">
-                          <dt className="text-label">source</dt>
+                          <dt className="text-label">{t.troubleSource}</dt>
                           <dd className="text-table text-ink-3">
                             {entry.source}
                           </dd>
@@ -561,10 +597,7 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                     </li>
                   ))}
                 </ol>
-                <p className="text-small mt-6 max-w-[68ch]">
-                  Still stuck? Open an issue with the exact message you saw and
-                  the output of omm scan.
-                </p>
+                <p className="text-small mt-6 max-w-[68ch]">{t.stillStuck}</p>
               </Reveal>
             </section>
 
@@ -572,17 +605,17 @@ export default function GuidePage({ guide }: { guide: Guide }) {
             <section aria-labelledby="elsewhere-title" className="py-8">
               <Reveal>
                 <h2 id="elsewhere-title" className="text-label">
-                  Elsewhere
+                  {t.elsewhere}
                 </h2>
                 <ul className="mt-6 flex flex-col border-t border-line-0">
                   {others.map((other) => (
                     <li key={other.slug} className="border-b border-line-0">
                       <Link
-                        href={other.href}
+                        href={localeHref(other.href, locale)}
                         className="grid grid-cols-1 gap-1 py-4 transition-colors duration-[120ms] ease-[var(--ease-micro)] hover:bg-bg-1 sm:grid-cols-[minmax(0,20ch)_minmax(0,1fr)] sm:gap-6"
                       >
                         <span className="text-ink-0">
-                          Install on {other.os}
+                          {fill(t.installOn, { os: other.os })}
                         </span>
                         <span className="text-small">{other.summary}</span>
                       </Link>
@@ -595,11 +628,8 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                       rel="noreferrer"
                       className="grid grid-cols-1 gap-1 py-4 transition-colors duration-[120ms] ease-[var(--ease-micro)] hover:bg-bg-1 sm:grid-cols-[minmax(0,20ch)_minmax(0,1fr)] sm:gap-6"
                     >
-                      <span className="text-ink-0">Source and README</span>
-                      <span className="text-small">
-                        github.com/omm-hippo/omm — issues, releases, and the
-                        installer scripts quoted on this page.
-                      </span>
+                      <span className="text-ink-0">{t.repo.title}</span>
+                      <span className="text-small">{t.repo.body}</span>
                     </a>
                   </li>
                   <li className="border-b border-line-0">
@@ -609,10 +639,8 @@ export default function GuidePage({ guide }: { guide: Guide }) {
                       rel="noreferrer"
                       className="grid grid-cols-1 gap-1 py-4 transition-colors duration-[120ms] ease-[var(--ease-micro)] hover:bg-bg-1 sm:grid-cols-[minmax(0,20ch)_minmax(0,1fr)] sm:gap-6"
                     >
-                      <span className="text-ink-0">Wiki</span>
-                      <span className="text-small">
-                        Compatible programs and the longer-form documentation.
-                      </span>
+                      <span className="text-ink-0">{t.wiki.title}</span>
+                      <span className="text-small">{t.wiki.body}</span>
                     </a>
                   </li>
                 </ul>
