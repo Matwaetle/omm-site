@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- omm mark: an omega with two eyes. Single colour, no gradient, no shadow. -->
+  <style>
+    .m { fill: none; stroke: #000; stroke-width: 6.5; stroke-linejoin: miter; stroke-linecap: butt; }
+    .e { fill: #000; }
+    @media (prefers-color-scheme: dark) {
+      .m { stroke: #fff; }
+      .e { fill: #fff; }
+    }
+  </style>
+  <!-- feet -->
+  <path class="m" d="M 10 56.5 H 28.5 M 35.5 56.5 H 54" />
+  <!-- legs + ring (one stroke so the joins are clean) -->
+  <path class="m" d="M 19.5 57 L 22.5 46 A 21 21 0 1 1 41.5 46 L 44.5 57" />
+  <!-- eyes -->
+  <circle class="e" cx="25.5" cy="27.5" r="3.4" />
+  <circle class="e" cx="38.5" cy="27.5" r="3.4" />
+</svg>
